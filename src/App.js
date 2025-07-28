@@ -37,10 +37,15 @@ function App() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}?action=read`);
+      const res = await fetch(API_URL);
       const json = await res.json();
       if (json.result === 'success') {
-        setData(json.data || []);
+        const formattedData = (json.data || []).map((item, index) => ({
+          ...item,
+          key: item.id || index,
+          data: dayjs(item.data).format('DD/MM/YYYY'),
+        }));
+        setData(formattedData);
       } else {
         message.error(json.message || 'Erro ao buscar dados');
       }
@@ -213,7 +218,9 @@ function App() {
             scroll={{ x: true }}
           />
         </Content>
-        <Footer style={{ textAlign: 'center' }}>© {new Date().getFullYear()} Controle PCP</Footer>
+        <Footer style={{ textAlign: 'center' }}>
+          © {new Date().getFullYear()} Controle PCP
+        </Footer>
       </Layout>
     </ConfigProvider>
   );
