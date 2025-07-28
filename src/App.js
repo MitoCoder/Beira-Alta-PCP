@@ -22,7 +22,6 @@ import 'dayjs/locale/pt-br';
 const { Header, Content, Footer } = Layout;
 const { Option } = Select;
 
-// URL do seu Google Apps Script Web App (publique com permissão “Anyone, even anonymous”)
 const API_URL = 'https://api-controle-ecru.vercel.app/api/proxy';
 
 function App() {
@@ -38,7 +37,7 @@ function App() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch(API_URL);
+      const res = await fetch(`${API_URL}?action=read`);
       const json = await res.json();
       if (json.result === 'success') {
         setData(json.data || []);
@@ -167,7 +166,9 @@ function App() {
                     { required: true, message: 'Informe a quantidade' },
                     {
                       validator: (_, value) =>
-                        value > 0 ? Promise.resolve() : Promise.reject(new Error('Quantidade deve ser maior que zero')),
+                        value > 0
+                          ? Promise.resolve()
+                          : Promise.reject(new Error('Quantidade deve ser maior que zero')),
                     },
                   ]}
                 >
