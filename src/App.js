@@ -22,7 +22,11 @@ import 'dayjs/locale/pt-br';
 const { Header, Content, Footer } = Layout;
 const { Option } = Select;
 
-const API_URL = '/api/controle';
+// Ajuste para chamar proxy na Vercel (ou local)
+const API_URL =
+  process.env.NODE_ENV === 'development'
+    ? 'http://localhost:3000/api/proxy'
+    : 'https://seuapp.vercel.app/api/proxy';
 
 function App() {
   const [form] = Form.useForm();
@@ -39,19 +43,29 @@ function App() {
     try {
       const res = await fetch(API_URL);
       const json = await res.json();
-      setData(json.data || []);
+      if (json.result === 'success') {
+        setData(json.data || []);
+      } else {
+        message.error(json.message || 'Erro ao buscar dados');
+      }
     } catch (err) {
-      message.error('Erro ao buscar dados');
+      message.error('Erro ao buscar dados: ' + err.message);
     }
     setLoading(false);
   };
 
   const handleSubmit = async (values) => {
+    // Validação extra de quantidade > 0 (mesmo que já tenha no form)
+    if (values.quantidade <= 0) {
+      message.error('Quantidade deve ser maior que zero');
+      return;
+    }
+
     const payload = {
       action: editingRecord ? 'update' : 'create',
       id: editingRecord?.id,
       produto: values.produto,
-      quantidade: values.quantidade,
+      quantidade: Number(values.quantidade),
       data: dayjs(values.data).format('DD/MM/YYYY'),
     };
 
@@ -62,16 +76,17 @@ function App() {
         body: JSON.stringify(payload),
       });
       const json = await res.json();
+
       if (json.result === 'success') {
         message.success(editingRecord ? 'Atualizado com sucesso' : 'Salvo com sucesso');
         form.resetFields();
         setEditingRecord(null);
         fetchData();
       } else {
-        message.error('Erro ao salvar');
+        message.error(json.message || 'Erro ao salvar');
       }
     } catch (err) {
-      message.error('Erro ao conectar com servidor');
+      message.error('Erro ao conectar com servidor: ' + err.message);
     }
   };
 
@@ -99,22 +114,24 @@ function App() {
             message.success('Excluído com sucesso');
             fetchData();
           } else {
-            message.error('Erro ao excluir');
+            message.error(json.message || 'Erro ao excluir');
           }
-        } catch {
-          message.error('Erro de conexão');
+        } catch (error) {
+          message.error('Erro de conexão: ' + error.message);
         }
       },
     });
   };
 
   const columns = [
-    { title: 'ID', dataIndex: 'id', key: 'id' },
+    { title: 'ID', dataIndex: 'id', key: 'id', width: 80 },
     { title: 'Produto', dataIndex: 'produto', key: 'produto' },
-    { title: 'Quantidade', dataIndex: 'quantidade', key: 'quantidade' },
-    { title: 'Data', dataIndex: 'data', key: 'data' },
+    { title: 'Quantidade', dataIndex: 'quantidade', key: 'quantidade', width: 120 },
+    { title: 'Data', dataIndex: 'data', key: 'data', width: 140 },
     {
       title: 'Ações',
+      key: 'actions',
+      width: 140,
       render: (_, record) => (
         <>
           <Button onClick={() => handleEdit(record)} type="link">
@@ -141,7 +158,7 @@ function App() {
                   label="Produto"
                   rules={[{ required: true, message: 'Informe o produto' }]}
                 >
-                  <Select placeholder="Selecione um produto">
+                  <Select placeholder="Selecione um produto" allowClear>
                     <Option value="Produto A">Produto A</Option>
                     <Option value="Produto B">Produto B</Option>
                     <Option value="Produto C">Produto C</Option>
@@ -152,7 +169,15 @@ function App() {
                 <Form.Item
                   name="quantidade"
                   label="Quantidade"
-                  rules={[{ required: true, message: 'Informe a quantidade' }]}
+                  rules={[
+                    { required: true, message: 'Informe a quantidade' },
+                    {
+                      type: 'number',
+                      min: 1,
+                      message: 'Quantidade deve ser maior que zero',
+                      transform: (value) => Number(value),
+                    },
+                  ]}
                 >
                   <Input type="number" min={1} />
                 </Form.Item>
@@ -169,7 +194,7 @@ function App() {
             </Row>
 
             <Form.Item>
-              <Button type="primary" htmlType="submit">
+              <Button type="primary" htmlType="submit" loading={loading}>
                 {editingRecord ? 'Atualizar' : 'Salvar'}
               </Button>
               {editingRecord && (
@@ -193,13 +218,15 @@ function App() {
             rowKey="id"
             style={{ marginTop: 32 }}
             scroll={{ x: true }}
+            pagination={{ pageSize: 8 }}
           />
         </Content>
-        <Footer style={{ textAlign: 'center' }}>© {new Date().getFullYear()} Controle PCP</Footer>
+        <Footer style={{ textAlign: 'center' }}>
+          © {new Date().getFullYear()} Controle PCP
+        </Footer>
       </Layout>
     </ConfigProvider>
   );
 }
 
 export default App;
-
