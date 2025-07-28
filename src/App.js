@@ -26,7 +26,7 @@ const { Option } = Select;
 const API_URL =
   process.env.NODE_ENV === 'development'
     ? 'http://localhost:3000/api/proxy'
-    : 'https://seuapp.vercel.app/api/proxy';
+    : 'http://controle-pcp-seven.vercel.app/api/proxy';
 
 function App() {
   const [form] = Form.useForm();
