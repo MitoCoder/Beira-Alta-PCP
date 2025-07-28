@@ -23,7 +23,7 @@ const { Header, Content, Footer } = Layout;
 const { Option } = Select;
 
 // URL do seu Google Apps Script Web App (publique com permissão “Anyone, even anonymous”)
-const API_URL = 'https://script.google.com/macros/s/SEU_ID_AQUI/exec';
+const API_URL = 'https://api-controle-ecru.vercel.app/api/proxy';
 
 function App() {
   const [form] = Form.useForm();
