@@ -22,9 +22,7 @@ import 'dayjs/locale/pt-br';
 const { Header, Content, Footer } = Layout;
 const { Option } = Select;
 
-const API_URL = '/api/controle';  // Rota que vamos criar
-
-// const API_URL = 'https://script.google.com/macros/s/AKfycby0P9N46bP4eYXVxUAojEcwjgtpIdg0M_f_6F8bZCDnziutKd7tGyUVcs59wp39ejR8/exec';
+const API_URL = '/api/controle';
 
 function App() {
   const [form] = Form.useForm();
@@ -39,7 +37,7 @@ function App() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}?action=read`);
+      const res = await fetch(API_URL);
       const json = await res.json();
       setData(json.data || []);
     } catch (err) {
@@ -60,6 +58,7 @@ function App() {
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
       const json = await res.json();
@@ -92,6 +91,7 @@ function App() {
         try {
           const res = await fetch(API_URL, {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'delete', id }),
           });
           const json = await res.json();
@@ -117,8 +117,12 @@ function App() {
       title: 'Ações',
       render: (_, record) => (
         <>
-          <Button onClick={() => handleEdit(record)} type="link">Editar</Button>
-          <Button onClick={() => handleDelete(record.id)} danger type="link">Excluir</Button>
+          <Button onClick={() => handleEdit(record)} type="link">
+            Editar
+          </Button>
+          <Button onClick={() => handleDelete(record.id)} danger type="link">
+            Excluir
+          </Button>
         </>
       ),
     },
@@ -169,7 +173,13 @@ function App() {
                 {editingRecord ? 'Atualizar' : 'Salvar'}
               </Button>
               {editingRecord && (
-                <Button onClick={() => { setEditingRecord(null); form.resetFields(); }} style={{ marginLeft: 8 }}>
+                <Button
+                  onClick={() => {
+                    setEditingRecord(null);
+                    form.resetFields();
+                  }}
+                  style={{ marginLeft: 8 }}
+                >
                   Cancelar
                 </Button>
               )}
@@ -185,9 +195,7 @@ function App() {
             scroll={{ x: true }}
           />
         </Content>
-        <Footer style={{ textAlign: 'center' }}>
-          © {new Date().getFullYear()} Controle PCP
-        </Footer>
+        <Footer style={{ textAlign: 'center' }}>© {new Date().getFullYear()} Controle PCP</Footer>
       </Layout>
     </ConfigProvider>
   );

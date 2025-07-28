@@ -7,10 +7,13 @@ export default async function handler(req, res) {
 
   try {
     if (method === 'GET') {
-      const response = await fetch(`${API_URL}?action=read`);
+      // Passa os parâmetros da query string para o Google Apps Script
+      const queryParams = new URLSearchParams(query).toString();
+      const response = await fetch(`${API_URL}?${queryParams}`);
       const data = await response.json();
       return res.status(200).json(data);
     } else if (method === 'POST') {
+      // Envia o corpo da requisição para o Google Apps Script
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
