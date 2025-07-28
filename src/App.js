@@ -22,11 +22,8 @@ import 'dayjs/locale/pt-br';
 const { Header, Content, Footer } = Layout;
 const { Option } = Select;
 
-// Ajuste para chamar proxy na Vercel (ou local)
-const API_URL =
-  process.env.NODE_ENV === 'development'
-    ? 'http://localhost:3000/api/proxy'
-    : 'http://controle-pcp-seven.vercel.app/api/proxy';
+// URL do seu Google Apps Script Web App (publique com permissão “Anyone, even anonymous”)
+const API_URL = 'https://script.google.com/macros/s/SEU_ID_AQUI/exec';
 
 function App() {
   const [form] = Form.useForm();
@@ -55,7 +52,6 @@ function App() {
   };
 
   const handleSubmit = async (values) => {
-    // Validação extra de quantidade > 0 (mesmo que já tenha no form)
     if (values.quantidade <= 0) {
       message.error('Quantidade deve ser maior que zero');
       return;
@@ -65,7 +61,7 @@ function App() {
       action: editingRecord ? 'update' : 'create',
       id: editingRecord?.id,
       produto: values.produto,
-      quantidade: Number(values.quantidade),
+      quantidade: values.quantidade,
       data: dayjs(values.data).format('DD/MM/YYYY'),
     };
 
@@ -116,22 +112,20 @@ function App() {
           } else {
             message.error(json.message || 'Erro ao excluir');
           }
-        } catch (error) {
-          message.error('Erro de conexão: ' + error.message);
+        } catch (err) {
+          message.error('Erro de conexão: ' + err.message);
         }
       },
     });
   };
 
   const columns = [
-    { title: 'ID', dataIndex: 'id', key: 'id', width: 80 },
+    { title: 'ID', dataIndex: 'id', key: 'id' },
     { title: 'Produto', dataIndex: 'produto', key: 'produto' },
-    { title: 'Quantidade', dataIndex: 'quantidade', key: 'quantidade', width: 120 },
-    { title: 'Data', dataIndex: 'data', key: 'data', width: 140 },
+    { title: 'Quantidade', dataIndex: 'quantidade', key: 'quantidade' },
+    { title: 'Data', dataIndex: 'data', key: 'data' },
     {
       title: 'Ações',
-      key: 'actions',
-      width: 140,
       render: (_, record) => (
         <>
           <Button onClick={() => handleEdit(record)} type="link">
@@ -158,7 +152,7 @@ function App() {
                   label="Produto"
                   rules={[{ required: true, message: 'Informe o produto' }]}
                 >
-                  <Select placeholder="Selecione um produto" allowClear>
+                  <Select placeholder="Selecione um produto">
                     <Option value="Produto A">Produto A</Option>
                     <Option value="Produto B">Produto B</Option>
                     <Option value="Produto C">Produto C</Option>
@@ -172,10 +166,8 @@ function App() {
                   rules={[
                     { required: true, message: 'Informe a quantidade' },
                     {
-                      type: 'number',
-                      min: 1,
-                      message: 'Quantidade deve ser maior que zero',
-                      transform: (value) => Number(value),
+                      validator: (_, value) =>
+                        value > 0 ? Promise.resolve() : Promise.reject(new Error('Quantidade deve ser maior que zero')),
                     },
                   ]}
                 >
@@ -194,7 +186,7 @@ function App() {
             </Row>
 
             <Form.Item>
-              <Button type="primary" htmlType="submit" loading={loading}>
+              <Button type="primary" htmlType="submit">
                 {editingRecord ? 'Atualizar' : 'Salvar'}
               </Button>
               {editingRecord && (
@@ -218,12 +210,9 @@ function App() {
             rowKey="id"
             style={{ marginTop: 32 }}
             scroll={{ x: true }}
-            pagination={{ pageSize: 8 }}
           />
         </Content>
-        <Footer style={{ textAlign: 'center' }}>
-          © {new Date().getFullYear()} Controle PCP
-        </Footer>
+        <Footer style={{ textAlign: 'center' }}>© {new Date().getFullYear()} Controle PCP</Footer>
       </Layout>
     </ConfigProvider>
   );
