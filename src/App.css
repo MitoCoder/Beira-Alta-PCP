@@ -1,46 +1,38 @@
-/* Reset básico */
-body, html, #root {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-}
-
-/* Layout do conteúdo */
-.ant-layout {
-  background: #f5f5f5;
-}
-
-.ant-layout-header {
-  background: #001529;
-  color: #fff;
-  font-weight: bold;
+.App {
   text-align: center;
 }
 
-.ant-layout-content {
-  background: #fff;
-  margin: 20px auto;
-  padding: 24px;
-  max-width: 800px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
 }
 
-.ant-form-item {
-  margin-bottom: 16px;
-}
-
-.ant-table {
-  margin-top: 24px;
-}
-
-@media (max-width: 768px) {
-  .ant-layout-content {
-    padding: 16px;
-    margin: 10px;
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
   }
+}
 
-  .ant-table {
-    font-size: 12px;
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
