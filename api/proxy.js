@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 
-const GAS_URL = 'https://script.google.com/macros/s/AKfycby0P9N46bP4eYXVxUAojEcwjgtpIdg0M_f_6F8bZCDnziutKd7tGyUVcs59wp39ejR8/exec';
+const GAS_URL = 'api-controle-ecru.vercel.app';
 
 export default async function handler(req, res) {
   try {
