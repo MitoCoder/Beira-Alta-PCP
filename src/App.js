@@ -9,7 +9,7 @@ import {
   Table,
   message,
   ConfigProvider,
-  Modal,
+  Popconfirm,
   Row,
   Col,
 } from 'antd';
@@ -18,6 +18,8 @@ import 'antd/dist/reset.css';
 import './App.css';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
+
+dayjs.locale('pt-br');
 
 const { Header, Content, Footer } = Layout;
 const { Option } = Select;
@@ -28,7 +30,9 @@ function App() {
   const [form] = Form.useForm();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -40,12 +44,7 @@ function App() {
       const res = await fetch(API_URL);
       const json = await res.json();
       if (json.result === 'success') {
-        const formattedData = (json.data || []).map((item, index) => ({
-          ...item,
-          key: item.id || index,
-          data: dayjs(item.data).format('DD/MM/YYYY'),
-        }));
-        setData(formattedData);
+        setData(json.data || []);
       } else {
         message.error(json.message || 'Erro ao buscar dados');
       }
@@ -66,19 +65,21 @@ function App() {
       id: editingRecord?.id,
       produto: values.produto,
       quantidade: values.quantidade,
-      data: dayjs(values.data).format('DD/MM/YYYY'),
+      data: dayjs(values.data).format('YYYY-MM-DD'),
     };
 
+    setSaving(true);
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
+
       const json = await res.json();
 
       if (json.result === 'success') {
-        message.success(editingRecord ? 'Atualizado com sucesso' : 'Salvo com sucesso');
+        message.success(editingRecord ? 'Registro atualizado!' : 'Registro criado!');
         form.resetFields();
         setEditingRecord(null);
         fetchData();
@@ -86,8 +87,9 @@ function App() {
         message.error(json.message || 'Erro ao salvar');
       }
     } catch (err) {
-      message.error('Erro ao conectar com servidor: ' + err.message);
+      message.error('Erro de conexão: ' + err.message);
     }
+    setSaving(false);
   };
 
   const handleEdit = (record) => {
@@ -95,39 +97,48 @@ function App() {
     form.setFieldsValue({
       produto: record.produto,
       quantidade: record.quantidade,
-      data: dayjs(record.data, 'DD/MM/YYYY'),
+      data: dayjs(record.data),
     });
   };
 
   const handleDelete = async (id) => {
-    Modal.confirm({
-      title: 'Confirmar exclusão?',
-      onOk: async () => {
-        try {
-          const res = await fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'delete', id }),
-          });
-          const json = await res.json();
-          if (json.result === 'success') {
-            message.success('Excluído com sucesso');
-            fetchData();
-          } else {
-            message.error(json.message || 'Erro ao excluir');
-          }
-        } catch (err) {
-          message.error('Erro de conexão: ' + err.message);
-        }
-      },
-    });
+    if (!id) {
+      message.error('ID inválido');
+      return;
+    }
+
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete',
+          id: String(id),
+        }),
+      });
+
+      const json = await res.json();
+      if (json.result === 'success') {
+        message.success('Registro excluído com sucesso');
+        fetchData();
+      } else {
+        message.error(json.message || 'Erro ao excluir');
+      }
+    } catch (err) {
+      message.error('Erro de conexão: ' + err.message);
+    }
   };
 
   const columns = [
     { title: 'ID', dataIndex: 'id', key: 'id' },
     { title: 'Produto', dataIndex: 'produto', key: 'produto' },
     { title: 'Quantidade', dataIndex: 'quantidade', key: 'quantidade' },
-    { title: 'Data', dataIndex: 'data', key: 'data' },
+    {
+      title: 'Data',
+      dataIndex: 'data',
+      key: 'data',
+      render: (text) => dayjs(text).format('DD-MM-YYYY'),
+    },
     {
       title: 'Ações',
       render: (_, record) => (
@@ -135,13 +146,24 @@ function App() {
           <Button onClick={() => handleEdit(record)} type="link">
             Editar
           </Button>
-          <Button onClick={() => handleDelete(record.id)} danger type="link">
-            Excluir
-          </Button>
+          <Popconfirm
+            title="Deseja excluir este registro?"
+            onConfirm={() => handleDelete(record.id)}
+            okText="Sim"
+            cancelText="Não"
+          >
+            <Button danger type="link">
+              Excluir
+            </Button>
+          </Popconfirm>
         </>
       ),
     },
   ];
+
+  const filteredData = data.filter((item) =>
+    item.produto.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <ConfigProvider locale={ptBR}>
@@ -192,8 +214,8 @@ function App() {
             </Row>
 
             <Form.Item>
-              <Button type="primary" htmlType="submit">
-                {editingRecord ? 'Atualizar' : 'Salvar'}
+              <Button type="primary" htmlType="submit" loading={saving}>
+                {editingRecord ? 'Atualizar' : 'Incluir'}
               </Button>
               {editingRecord && (
                 <Button
@@ -209,18 +231,23 @@ function App() {
             </Form.Item>
           </Form>
 
+          <Input.Search
+            placeholder="Buscar por produto..."
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{ marginBottom: 16, maxWidth: 300 }}
+            allowClear
+          />
+
           <Table
             columns={columns}
-            dataSource={data}
+            dataSource={filteredData}
             loading={loading}
             rowKey="id"
-            style={{ marginTop: 32 }}
+            style={{ marginTop: 16 }}
             scroll={{ x: true }}
           />
         </Content>
-        <Footer style={{ textAlign: 'center' }}>
-          © {new Date().getFullYear()} Controle PCP
-        </Footer>
+        <Footer style={{ textAlign: 'center' }}>© {new Date().getFullYear()} Controle PCP</Footer>
       </Layout>
     </ConfigProvider>
   );
