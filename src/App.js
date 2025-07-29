@@ -101,12 +101,7 @@ function App() {
     });
   };
 
-  const handleDelete = async (id) => {
-    if (!id) {
-      message.error('ID inválido');
-      return;
-    }
-
+  const confirmDelete = async (id) => {
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
@@ -141,18 +136,63 @@ function App() {
     },
     {
       title: 'Ações',
+      key: 'actions',
       render: (_, record) => (
         <>
           <Button onClick={() => handleEdit(record)} type="link">
             Editar
           </Button>
+
           <Popconfirm
             title="Deseja excluir este registro?"
-            onConfirm={() => handleDelete(record.id)}
             okText="Sim"
-            cancelText="Não"
+            cancelText="Cancelar"
+            onConfirm={() => confirmDelete(record.id)}
+            okButtonProps={{
+              style: {
+                background: 'linear-gradient(135deg, #005ba1, #0074d9)',
+                borderRadius: '12px',
+                color: 'white',
+                border: 'none',
+                boxShadow: '0 8px 20px rgba(0, 123, 255, 0.3)',
+                fontWeight: '700',
+                padding: '6px 20px',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+              },
+              onMouseEnter: (e) =>
+                (e.target.style.boxShadow = '0 12px 28px rgba(0, 123, 255, 0.45)'),
+              onMouseLeave: (e) =>
+                (e.target.style.boxShadow = '0 8px 20px rgba(0, 123, 255, 0.3)'),
+            }}
+            cancelButtonProps={{
+              style: {
+                backgroundColor: 'white',
+                borderRadius: '12px',
+                color: '#005ba1',
+                border: '2px solid #005ba1',
+                fontWeight: '600',
+                padding: '6px 20px',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+              },
+              onMouseEnter: (e) => {
+                e.target.style.backgroundColor = '#005ba1';
+                e.target.style.color = 'white';
+                e.target.style.boxShadow = '0 4px 12px rgba(0,91,161,0.3)';
+              },
+              onMouseLeave: (e) => {
+                e.target.style.backgroundColor = 'white';
+                e.target.style.color = '#005ba1';
+                e.target.style.boxShadow = 'none';
+              },
+            }}
           >
-            <Button danger type="link">
+            <Button
+              danger
+              type="link"
+              style={{ color: 'red', fontWeight: '600', marginLeft: 8 }}
+            >
               Excluir
             </Button>
           </Popconfirm>
@@ -167,18 +207,49 @@ function App() {
 
   return (
     <ConfigProvider locale={ptBR}>
-      <Layout style={{ minHeight: '100vh' }}>
-        <Header style={{ color: '#fff', fontSize: 20 }}>Controle de Produção</Header>
-        <Content style={{ padding: 24, maxWidth: 1200, margin: '0 auto' }}>
+      <Layout style={{ minHeight: '100vh', backgroundColor: '#f5f7fa' }}>
+        <Header
+          style={{
+            color: '#fff',
+            fontSize: 24,
+            fontWeight: 'bold',
+            backgroundColor: '#003366',
+            paddingLeft: 32,
+            boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+          }}
+        >
+          Controle de Produção
+        </Header>
+        <Content
+          style={{
+            padding: 24,
+            maxWidth: 1100,
+            margin: '24px auto',
+            backgroundColor: 'white',
+            borderRadius: 16,
+            boxShadow: '0 8px 20px rgba(0, 0, 0, 0.1)',
+            minHeight: '70vh',
+          }}
+        >
           <Form layout="vertical" form={form} onFinish={handleSubmit}>
-            <Row gutter={16}>
+            <Row gutter={24} justify="space-between" align="middle">
               <Col xs={24} sm={8}>
                 <Form.Item
                   name="produto"
                   label="Produto"
                   rules={[{ required: true, message: 'Informe o produto' }]}
                 >
-                  <Select placeholder="Selecione um produto">
+                  <Select
+                    placeholder="Selecione um produto"
+                    size="large"
+                    popupClassName="custom-select-popup"
+                    bordered={false}
+                    style={{
+                      borderRadius: 12,
+                      backgroundColor: '#f0f2f5',
+                      paddingLeft: 12,
+                    }}
+                  >
                     <Option value="Produto A">Produto A</Option>
                     <Option value="Produto B">Produto B</Option>
                     <Option value="Produto C">Produto C</Option>
@@ -199,7 +270,18 @@ function App() {
                     },
                   ]}
                 >
-                  <Input type="number" min={1} />
+                  <Input
+                    type="number"
+                    min={1}
+                    size="large"
+                    style={{
+                      borderRadius: 12,
+                      backgroundColor: '#f0f2f5',
+                      paddingLeft: 12,
+                      height: 44,
+                    }}
+                    bordered={false}
+                  />
                 </Form.Item>
               </Col>
               <Col xs={24} sm={8}>
@@ -208,34 +290,60 @@ function App() {
                   label="Data"
                   rules={[{ required: true, message: 'Informe a data' }]}
                 >
-                  <DatePicker format="DD/MM/YYYY" style={{ width: '100%' }} />
+                  <DatePicker
+                    format="DD/MM/YYYY"
+                    style={{
+                      width: '100%',
+                      borderRadius: 12,
+                      backgroundColor: '#f0f2f5',
+                      height: 44,
+                    }}
+                    size="large"
+                    bordered={false}
+                  />
                 </Form.Item>
               </Col>
             </Row>
 
-            <Form.Item>
-              <Button type="primary" htmlType="submit" loading={saving}>
+            <Form.Item style={{ textAlign: 'right' }}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={saving}
+                style={{
+                  borderRadius: 20,
+                  padding: '10px 32px',
+                  fontWeight: '700',
+                  background: 'linear-gradient(135deg, #005ba1, #0074d9)',
+                  boxShadow: '0 8px 20px rgba(0, 123, 255, 0.3)',
+                  border: 'none',
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.boxShadow = '0 12px 28px rgba(0, 123, 255, 0.45)')
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.boxShadow = '0 8px 20px rgba(0, 123, 255, 0.3)')
+                }
+              >
                 {editingRecord ? 'Atualizar' : 'Incluir'}
               </Button>
-              {editingRecord && (
-                <Button
-                  onClick={() => {
-                    setEditingRecord(null);
-                    form.resetFields();
-                  }}
-                  style={{ marginLeft: 8 }}
-                >
-                  Cancelar
-                </Button>
-              )}
             </Form.Item>
           </Form>
 
           <Input.Search
-            placeholder="Buscar por produto..."
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ marginBottom: 16, maxWidth: 300 }}
+            placeholder="Buscar produto"
             allowClear
+            size="large"
+            style={{
+              marginBottom: 20,
+              borderRadius: 12,
+              backgroundColor: '#f0f2f5',
+              border: 'none',
+              boxShadow: 'inset 0 1px 4px rgba(0,0,0,0.1)',
+              height: 44,
+            }}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            value={searchTerm}
           />
 
           <Table
@@ -243,11 +351,23 @@ function App() {
             dataSource={filteredData}
             loading={loading}
             rowKey="id"
-            style={{ marginTop: 16 }}
-            scroll={{ x: true }}
+            pagination={{ pageSize: 7 }}
+            bordered={false}
+            style={{ borderRadius: 16, overflow: 'hidden' }}
+            scroll={{ x: 700 }}
           />
         </Content>
-        <Footer style={{ textAlign: 'center' }}>© {new Date().getFullYear()} Controle PCP</Footer>
+        <Footer
+          style={{
+            textAlign: 'center',
+            backgroundColor: '#003366',
+            color: '#fff',
+            fontWeight: '600',
+            boxShadow: '0 -2px 6px rgba(0,0,0,0.15)',
+          }}
+        >
+          Controle de Produção ©2025
+        </Footer>
       </Layout>
     </ConfigProvider>
   );
