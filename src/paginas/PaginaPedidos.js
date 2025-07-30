@@ -1,4 +1,6 @@
+// src/paginas/PaginaPedidos.js
 import React, { useState, useRef } from 'react';
+import LayoutPrincipal from '../componentes/LayoutPrincipal';
 import {
   Button,
   Typography,
@@ -30,8 +32,8 @@ export default function PaginaPedidos() {
 
   const converterQuantidade = (str) => {
     if (!str) return 0;
-    let limpo = str.replace(/\./g, '').replace(/,/g, '.');
-    let num = parseFloat(limpo);
+    const limpo = str.replace(/\./g, '').replace(/,/g, '.');
+    const num = parseFloat(limpo);
     return isNaN(num) ? 0 : num;
   };
 
@@ -159,93 +161,95 @@ export default function PaginaPedidos() {
   };
 
   return (
-   <Box sx={{ mt: 6, p: 4, maxWidth: 1000, mx: 'auto', backgroundColor: '#f9f9f9', borderRadius: 2, boxShadow: 3 }}>
-      <Typography variant="h3" align="center" fontWeight="bold" color="primary" gutterBottom>
-        PEDIDOS - Unificador
-      </Typography>
+    <LayoutPrincipal>
+      <Box sx={{ mt: 6, p: 4, maxWidth: 1000, mx: 'auto', backgroundColor: '#f9f9f9', borderRadius: 2, boxShadow: 3 }}>
+        <Typography variant="h3" align="center" fontWeight="bold" color="primary" gutterBottom>
+          PEDIDOS - Unificador
+        </Typography>
 
-      <Typography variant="subtitle1" mb={2} textAlign="center">
-        Importe os arquivos CSV de pedidos e itens para processar e visualizar as quantidades pendentes e salve.
-      </Typography>
+        <Typography variant="subtitle1" mb={2} textAlign="center">
+          Importe os arquivos CSV de pedidos e itens para processar e visualizar as quantidades pendentes e salve.
+        </Typography>
 
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center" mb={3}>
-        <Button variant="contained" component="label" color={arquivosCarregados.itens ? 'success' : 'primary'}>
-          Carregar itens.csv
-          <input type="file" accept=".csv" hidden onChange={(e) => e.target.files.length && processarCSV(e.target.files[0], 'itens')} />
-        </Button>
-        <Button variant="contained" component="label" color={arquivosCarregados.pedidos ? 'success' : 'primary'}>
-          Carregar pedidos.csv
-          <input type="file" accept=".csv" hidden onChange={(e) => e.target.files.length && processarCSV(e.target.files[0], 'pedidos')} />
-        </Button>
-        <Button variant="outlined" onClick={processarResultado} disabled={!arquivosCarregados.itens || !arquivosCarregados.pedidos}>
-          Processar e Agrupar
-        </Button>
-      </Stack>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center" mb={3}>
+          <Button variant="contained" component="label" color={arquivosCarregados.itens ? 'success' : 'primary'}>
+            Carregar itens.csv
+            <input type="file" accept=".csv" hidden onChange={(e) => e.target.files.length && processarCSV(e.target.files[0], 'itens')} />
+          </Button>
+          <Button variant="contained" component="label" color={arquivosCarregados.pedidos ? 'success' : 'primary'}>
+            Carregar pedidos.csv
+            <input type="file" accept=".csv" hidden onChange={(e) => e.target.files.length && processarCSV(e.target.files[0], 'pedidos')} />
+          </Button>
+          <Button variant="outlined" onClick={processarResultado} disabled={!arquivosCarregados.itens || !arquivosCarregados.pedidos}>
+            Processar e Agrupar
+          </Button>
+        </Stack>
 
-      {msgStatus && <Alert severity={btnColor}>{msgStatus}</Alert>}
+        {msgStatus && <Alert severity={btnColor}>{msgStatus}</Alert>}
 
-      {resultado && (
-        <>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="flex-end" my={2}>
-            <Button variant="contained" color="secondary" onClick={imprimirTabela}>
-              🖨️ Imprimir (A4)
-            </Button>
-            <Button variant="contained" color="success" onClick={exportarExcel}>
-              📥 Exportar Excel
-            </Button>
-          </Stack>
+        {resultado && (
+          <>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="flex-end" my={2}>
+              <Button variant="contained" color="secondary" onClick={imprimirTabela}>
+                🖨️ Imprimir (A4)
+              </Button>
+              <Button variant="contained" color="success" onClick={exportarExcel}>
+                📥 Exportar Excel
+              </Button>
+            </Stack>
 
-          <TableContainer component={Paper} sx={{ maxHeight: 440 }} ref={tabelaRef} className="tabela-container">
-            <Table stickyHeader size="small">
-              <TableHead>
-                <TableRow sx={{ backgroundColor: 'primary.main' }}>
-                  <TableCell sx={{ fontWeight: 'bold', color: 'dark' }}>Código Produto</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', color: 'dark' }}>Descrição</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', color: 'dark' }} align="right">Pedido Total</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {Object.entries(resultado).map(([chave, quantidade]) => {
-                  const [codigo, descricao] = chave.split('||');
-                  return (
-                    <TableRow key={chave} hover>
-                      <TableCell>{codigo}</TableCell>
-                      <TableCell>{descricao}</TableCell>
-                      <TableCell align="right">{Math.round(quantidade).toLocaleString('pt-BR')}</TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
-
-          <div style={{ display: 'none' }}>
-            <div ref={areaImpressaoRef}>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Código Produto</th>
-                    <th>Descrição</th>
-                    <th>Quantidade Total</th>
-                  </tr>
-                </thead>
-                <tbody>
+            <TableContainer component={Paper} sx={{ maxHeight: 440 }} ref={tabelaRef}>
+              <Table stickyHeader size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Código Produto</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Descrição</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }} align="right">Quantidade Total</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
                   {Object.entries(resultado).map(([chave, quantidade]) => {
                     const [codigo, descricao] = chave.split('||');
                     return (
-                      <tr key={chave}>
-                        <td>{codigo}</td>
-                        <td>{descricao}</td>
-                        <td>{Math.round(quantidade).toLocaleString('pt-BR')}</td>
-                      </tr>
+                      <TableRow key={chave} hover>
+                        <TableCell>{codigo}</TableCell>
+                        <TableCell>{descricao}</TableCell>
+                        <TableCell align="right">{Math.round(quantidade).toLocaleString('pt-BR')}</TableCell>
+                      </TableRow>
                     );
                   })}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            <div style={{ display: 'none' }}>
+              <div ref={areaImpressaoRef}>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Código Produto</th>
+                      <th>Descrição</th>
+                      <th>Quantidade Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(resultado).map(([chave, quantidade]) => {
+                      const [codigo, descricao] = chave.split('||');
+                      return (
+                        <tr key={chave}>
+                          <td>{codigo}</td>
+                          <td>{descricao}</td>
+                          <td>{Math.round(quantidade).toLocaleString('pt-BR')}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        </>
-      )}
-    </Box>
+          </>
+        )}
+      </Box>
+    </LayoutPrincipal>
   );
 }
