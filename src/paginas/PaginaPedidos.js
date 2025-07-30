@@ -161,11 +161,11 @@ export default function PaginaPedidos() {
   return (
    <Box sx={{ mt: 6, p: 4, maxWidth: 1000, mx: 'auto', backgroundColor: '#f9f9f9', borderRadius: 2, boxShadow: 3 }}>
       <Typography variant="h3" align="center" fontWeight="bold" color="primary" gutterBottom>
-        NETGERA - Unificador
+        PEDIDOS - Unificador
       </Typography>
 
       <Typography variant="subtitle1" mb={2} textAlign="center">
-        Importe os arquivos CSV de pedidos e itens para processar e visualizar as quantidades pendentes.
+        Importe os arquivos CSV de pedidos e itens para processar e visualizar as quantidades pendentes e salve.
       </Typography>
 
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center" mb={3}>
