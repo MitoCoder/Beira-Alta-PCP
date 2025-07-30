@@ -17,12 +17,20 @@ function Menu() {
         <Button color="inherit" component={Link} to="/">
           Produção
         </Button>
-        <Button color="inherit" component={Link} to="/produtos">
-          Produtos
-        </Button>
         <Button color="inherit" component={Link} to="/pedidos">
           Pedidos
         </Button>
+
+
+        <Button color="inherit" component={Link} to="/produtos">
+          Produtos
+        </Button>
+
+
+
+
+
+        
         <Button color="inherit" component={Link} to="/dashboard">
           Dashboard
         </Button>
