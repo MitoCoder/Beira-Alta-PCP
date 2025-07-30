@@ -1,70 +1,98 @@
-# Getting Started with Create React App
+# 📦 Sistema PCP - Planejamento e Controle da Produção
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Este projeto é um sistema web desenvolvido em **React** para atender as rotinas de um analista de PCP (Planejamento e Controle da Produção). O foco principal está na organização do fluxo produtivo, controle de produtos, geração de relatórios e ajustes de configuração.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 🚀 Funcionalidades
 
-### `npm start`
+- 📊 **Dashboard** com indicadores de produção.
+- 🛠️ **Controle de Produção** com dados em tempo real.
+- 📦 **Gerenciamento de Produtos** com listagem e organização.
+- 📁 **Relatórios e Análises** de performance e produção.
+- ⚙️ **Configurações do Sistema** ajustáveis por perfil.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🗂️ Estrutura do Projeto
 
-### `npm test`
+```
+src/
+│
+├── componentes/
+│   ├── LayoutPrincipal.js         # Componente de layout principal (barra superior, container).
+│   ├── TabelaProdutos.js          # Componente de tabela para exibir produtos.
+│   └── TabelaProdutosEdicao.js    # Componente de tabela onde pode editar.
+│
+├── gancho/
+│   └── UseProdutos.js             # Hook customizado para gerenciar dados de produtos
+│
+├── paginas/
+│   ├── ControleProducao.js        # Página principal para controle da produção
+│   ├── PaginaConfiguracoes.js     # Página para configurações do sistema
+│   ├── PaginaDashboard.js         # Página do dashboard com indicadores
+│   ├── PaginaPedidos.js           # Página de pedidos com conversão csv - deve enviar os 2 csv pra poder resolver
+│   ├── PaginaProdutos.js          # Página para gerenciamento de produtos
+│   └── PaginasRelatorios.js       # Página para relatórios e análises
+│
+├── servicos/
+│   └── api.js                     # Arquivo para futuras integrações com backend (API)
+│
+└── App.js                         # Arquivo principal que configura as rotas
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## 🛠️ Tecnologias Utilizadas
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- [React.js](https://reactjs.org/)
+- [React Router](https://reactrouter.com/) – para controle de rotas
+- [JavaScript (ES6+)](https://developer.mozilla.org/pt-BR/docs/Web/JavaScript)
+- [Vercel](https://vercel.com/) – para deploy do sistema
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 📦 Instalação
 
-### `npm run eject`
+```bash
+# Clone o repositório
+git clone https://github.com/seu-usuario/sistema-pcp.git
+cd sistema-pcp
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+# Instale as dependências
+npm install
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+# Inicie o projeto em modo de desenvolvimento
+npm start
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+A aplicação estará disponível em `http://localhost:3000`.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+---
 
-## Learn More
+## 📤 Deploy
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Este projeto está hospedado via [Vercel](https://vercel.com), com build automático a cada push na branch principal.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+🔗 [Acessar sistema](https://controle-pcp-seven.vercel.app)
 
-### Code Splitting
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## 📌 Próximos Passos
 
-### Analyzing the Bundle Size
+- Integração com backend (ex: Node.js + Express ou Firebase)
+- Controle de login e autenticação por perfil
+- Exportação de relatórios em PDF/Excel
+- Responsividade completa para dispositivos móveis
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+---
 
-### Making a Progressive Web App
+## 🙋‍♂️ Contribuição
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Pull requests são bem-vindos! Para grandes mudanças, por favor abra uma issue primeiro para discutir o que você gostaria de modificar.
 
-### Advanced Configuration
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## 🧾 Licença
 
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Este projeto está sob licença MIT.

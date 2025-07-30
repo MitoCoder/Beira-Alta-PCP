@@ -1,3 +1,28 @@
-# https://www.robotstxt.org/robotstxt.html
+# robots.txt do Sistema PPCP
+# Domínio: controle-pcp-seven.vercel.app
+
 User-agent: *
-Disallow:
+# Bloqueia áreas administrativas, APIs e arquivos temporários
+Disallow: /admin/
+Disallow: /login/
+Disallow: /api/
+Disallow: /config/
+Disallow: /privado/
+Disallow: /temp/
+Disallow: /node_modules/
+Disallow: /scripts/
+Disallow: /build/
+Disallow: /static/media/
+
+# Bloqueia tipos de arquivos que não devem ser indexados
+Disallow: /*.env$
+Disallow: /*.log$
+Disallow: /*.md$
+Disallow: /*.json$
+
+# Permite tudo o que estiver fora das regras acima
+Allow: /
+
+# Indica o sitemap.xml gerado automaticamente
+Sitemap: https://controle‑pcp‑seven.vercel.app/sitemap.xml
+
