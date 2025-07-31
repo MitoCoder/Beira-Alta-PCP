@@ -40,31 +40,32 @@ export default function ControleProducao() {
     nivel: '',
     duracaoAtual: '',
     aposProduzir: '',
-    produzir: 0,
+    produzir: '',
     dataProducao: '',
     ordem: '',
     linha: '',
-    lote: '',
+    lote_op: '',
     status: 'Pendente',
   });
 
-const produtosFiltrados = useMemo(() => {
-  const termo = busca.toLowerCase().trim();
-  if (!termo) return produtos;
+  const produtosFiltrados = useMemo(() => {
+    const termo = busca.toLowerCase().trim();
+    if (!termo) return produtos;
 
-  return produtos.filter((p) => {
-    const descricao = (p.descricao || '').toString().toLowerCase();
-    const codigo = (p.codigo || '').toString().toLowerCase();
-    const lote = (p.lote || '').toString().toLowerCase();
-    return descricao.includes(termo) || codigo.includes(termo) || lote.includes(termo);
-  });
-}, [busca, produtos]);
+    return produtos.filter((p) => {
+      const descricao = (p.descricao || '').toString().toLowerCase();
+      const codigo = (p.codigo || '').toString().toLowerCase();
+      const lote_op = (p.lote_op || '').toString().toLowerCase();
+      return descricao.includes(termo) || codigo.includes(termo) || lote_op.includes(termo);
+    });
+  }, [busca, produtos]);
 
   const totalQuantidade = produtos.reduce(
     (acc, cur) => acc + Number(cur.estoqueReal || 0),
     0
   );
 
+  // Função para editar qualquer campo do produto (aceita letras e números)
   const editarCampo = (id, campo, valor) => {
     const novaLista = produtos.map((p) =>
       p.id === id ? { ...p, [campo]: valor } : p
@@ -84,11 +85,11 @@ const produtosFiltrados = useMemo(() => {
       nivel: '',
       duracaoAtual: '',
       aposProduzir: '',
-      produzir: 0,
+      produzir: '',
       dataProducao: '',
       ordem: '',
       linha: '',
-      lote: '',
+      lote_op: '',
       status: 'Pendente',
     });
   };
@@ -103,13 +104,15 @@ const produtosFiltrados = useMemo(() => {
     const novo = {
       ...novoProduto,
       id: produtos.length > 0 ? Math.max(...produtos.map((p) => p.id)) + 1 : 1,
-      mediaVenda: Number(novoProduto.mediaVenda) || 0,
-      capacidadePortaPallet: Number(novoProduto.capacidadePortaPallet) || 0,
-      estoqueReal: Number(novoProduto.estoqueReal) || 0,
-      aposProduzir: Number(novoProduto.aposProduzir) || 0,
-      produzir: Number(novoProduto.produzir) || 0,
-      ordem: Number(novoProduto.ordem) || 0,
-      lote: Number(novoProduto.lote) || 0,
+      // não converto para número para permitir valores livres (strings)
+      // Se quiser converter para números em algum lugar, faça depois da edição
+      mediaVenda: novoProduto.mediaVenda,
+      capacidadePortaPallet: novoProduto.capacidadePortaPallet,
+      estoqueReal: novoProduto.estoqueReal,
+      aposProduzir: novoProduto.aposProduzir,
+      produzir: novoProduto.produzir,
+      ordem: novoProduto.ordem,
+      lote_op: novoProduto.lote_op,
     };
 
     setProdutos([...produtos, novo]);
@@ -161,6 +164,7 @@ const produtosFiltrados = useMemo(() => {
             borderColor: 'divider',
           }}
         >
+          {/* Passa os produtos filtrados e o callback para editar */}
           <TabelaProdutosEdicao produtos={produtosFiltrados} onEditar={editarCampo} />
         </Box>
 
@@ -199,7 +203,7 @@ const produtosFiltrados = useMemo(() => {
                   fullWidth
                   size="medium"
                   variant="outlined"
-                  type="number"
+                  // MUDANÇA AQUI: removi type="number" para permitir letras
                   value={novoProduto.mediaVenda}
                   onChange={(e) => alterarNovoProduto('mediaVenda', e.target.value)}
                 />
@@ -210,7 +214,7 @@ const produtosFiltrados = useMemo(() => {
                   fullWidth
                   size="medium"
                   variant="outlined"
-                  type="number"
+                  // removido type="number"
                   value={novoProduto.capacidadePortaPallet}
                   onChange={(e) => alterarNovoProduto('capacidadePortaPallet', e.target.value)}
                 />
@@ -222,7 +226,7 @@ const produtosFiltrados = useMemo(() => {
                   fullWidth
                   size="medium"
                   variant="outlined"
-                  type="number"
+                  // removido type="number"
                   value={novoProduto.estoqueReal}
                   onChange={(e) => alterarNovoProduto('estoqueReal', e.target.value)}
                 />
@@ -254,7 +258,7 @@ const produtosFiltrados = useMemo(() => {
                   fullWidth
                   size="medium"
                   variant="outlined"
-                  type="number"
+                  // removido type="number"
                   value={novoProduto.aposProduzir}
                   onChange={(e) => alterarNovoProduto('aposProduzir', e.target.value)}
                 />
@@ -266,7 +270,7 @@ const produtosFiltrados = useMemo(() => {
                   fullWidth
                   size="medium"
                   variant="outlined"
-                  type="number"
+                  // removido type="number"
                   value={novoProduto.produzir}
                   onChange={(e) => alterarNovoProduto('produzir', e.target.value)}
                 />
@@ -290,7 +294,7 @@ const produtosFiltrados = useMemo(() => {
                   fullWidth
                   size="medium"
                   variant="outlined"
-                  type="number"
+                  // removido type="number"
                   value={novoProduto.ordem}
                   onChange={(e) => alterarNovoProduto('ordem', e.target.value)}
                 />
@@ -309,13 +313,13 @@ const produtosFiltrados = useMemo(() => {
 
               <Grid item xs={12} sm={6}>
                 <TextField
-                  label="Lote"
+                  label="Lote_op"
                   fullWidth
                   size="medium"
                   variant="outlined"
-                  type="number"
-                  value={novoProduto.lote}
-                  onChange={(e) => alterarNovoProduto('lote', e.target.value)}
+                  // removido type="number"
+                  value={novoProduto.lote_op}
+                  onChange={(e) => alterarNovoProduto('lote_op', e.target.value)}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>

@@ -112,14 +112,14 @@ export default function TabelaProdutosEdicao({ produtos, onEditar }) {
               <TableCell sx={{ px: 0.5, py: 0.25, textAlign: 'center', minWidth: 90, maxWidth: 110 }}>
                 <TextField
                   size="small"
-                  type="number"
+                  type="text"
                   variant="outlined"
-                  value={produto.produzir}
+                  value={produto.produzir || ''}
                   onChange={(e) =>
                     onEditar(
                       produto.id,
                       'produzir',
-                      e.target.value.replace(/\D/g, '').slice(0, 7)
+                      e.target.value.slice(0, 7)
                     )
                   }
                   inputProps={{
@@ -158,36 +158,36 @@ export default function TabelaProdutosEdicao({ produtos, onEditar }) {
               </TableCell>
 
               <TableCell sx={{ px: 0.5, py: 0.25, textAlign: 'center', minWidth: 30, maxWidth: 40 }}>
-<TextField
-  size="small"
-  type="text"
-  variant="outlined"
-  value={produto.ordem}
-  onChange={(e) => onEditar(produto.id, 'ordem', e.target.value.slice(0, 10))}
-  inputProps={{
-    maxLength: 10,
-    style: {
-      fontSize: '0.7rem',
-      padding: '5px 6px',
-      height: 24,
-      textAlign: 'center',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
-    },
-  }}
-  sx={{ width: '100%' }}
-/>
+                <TextField
+                  size="small"
+                  type="text"
+                  variant="outlined"
+                  value={produto.ordem || ''}
+                  onChange={(e) => onEditar(produto.id, 'ordem', e.target.value.slice(0, 10))}
+                  inputProps={{
+                    maxLength: 10,
+                    style: {
+                      fontSize: '0.7rem',
+                      padding: '5px 6px',
+                      height: 24,
+                      textAlign: 'center',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    },
+                  }}
+                  sx={{ width: '100%' }}
+                />
               </TableCell>
 
               <TableCell sx={{ px: 0.5, py: 0.25, textAlign: 'center', minWidth: 60, maxWidth: 80 }}>
                 <TextField
                   size="small"
-                  type="number"
+                  type="text"
                   variant="outlined"
-                  value={produto.lote}
+                  value={produto.lote_op || ''}
                   onChange={(e) =>
-                    onEditar(produto.id, 'lote', e.target.value.replace(/\D/g, ''))
+                    onEditar(produto.id, 'lote_op', e.target.value.slice(0, 6))
                   }
                   inputProps={{
                     maxLength: 6,

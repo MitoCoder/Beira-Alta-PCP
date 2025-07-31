@@ -1,4 +1,3 @@
-// src/paginas/PaginaProdutos.js
 import React, { useState } from 'react';
 import {
   Box,
@@ -33,7 +32,7 @@ export default function PaginaProdutos() {
   const campos = [
     'id', 'codigo', 'descricao', 'modelo', 'ml', 'tipo', 'mediaVenda', 'pedidoTotal',
     'estoqueAtual', 'capacidadePortaPallet', 'estoqueReal', 'nivel', 'duracaoAtual',
-    'aposProduzir', 'produzir', 'dataProducao', 'ordem', 'linha', 'lote', 'status',
+    'aposProduzir', 'produzir', 'dataProducao', 'ordem', 'linha', 'lote_op', 'status',
     'faltaParaOMinimo', 'qtdEmLitros', 'undPorLitros', 'saldoAposProducao',
     'diasAposProduzir', 'hold'
   ];
@@ -94,7 +93,7 @@ export default function PaginaProdutos() {
   const produtosFiltrados = produtos.filter((p) =>
     p.codigo.toLowerCase().includes(filtros.codigo.toLowerCase()) &&
     p.descricao.toLowerCase().includes(filtros.descricao.toLowerCase()) &&
-    (p.lote || '').toString().toLowerCase().includes(filtros.lote_op.toLowerCase()) &&
+    (p.lote_op || '').toLowerCase().includes(filtros.lote_op.toLowerCase()) &&
     (p.dataProducao || '').toLowerCase().includes(filtros.data_producao.toLowerCase())
   );
 
@@ -109,22 +108,22 @@ export default function PaginaProdutos() {
       mediaVenda: 'MÉDIA VENDA',
       pedidoTotal: 'PEDIDO TOTAL',
       estoqueAtual: 'ESTOQUE ATUAL',
-      capacidadePortaPallet: 'CAPACIDADE PORTA PALLET',
+      capacidadePortaPallet: 'CAP. PALLET',
       estoqueReal: 'ESTOQUE REAL',
       nivel: 'NÍVEL',
       duracaoAtual: 'DURAÇÃO ATUAL',
       aposProduzir: 'APÓS PRODUZIR',
       produzir: 'PRODUZIR',
       dataProducao: 'DATA PRODUÇÃO',
-      ordem: 'OP',
+      ordem: 'ORDEM',
       linha: 'LINHA',
-      lote: 'LOTE OP',
+      lote_op: 'LOTE (OP)', // <- CORRIGIDO AQUI
       status: 'STATUS',
-      faltaParaOMinimo: 'FALTA PARA MÍNIMO',
+      faltaParaOMinimo: 'FALTA P/ MÍNIMO',
       qtdEmLitros: 'QTD EM LITROS',
-      undPorLitros: 'UND POR LITROS',
-      saldoAposProducao: 'SALDO APÓS PRODUÇÃO',
-      diasAposProduzir: 'DIAS APÓS PRODUZIR',
+      undPorLitros: 'UND/LITRO',
+      saldoAposProducao: 'SALDO PÓS PRODUÇÃO',
+      diasAposProduzir: 'DIAS PÓS PRODUÇÃO',
       hold: 'HOLD',
     };
     return mapTitulos[campo] || campo.toUpperCase();
@@ -153,7 +152,7 @@ export default function PaginaProdutos() {
             size="small"
           />
           <TextField
-            label="Filtro por OP"
+            label="Filtro por Lote (OP)" // <- CORRIGIDO AQUI
             value={filtros.lote_op}
             onChange={(e) => setFiltros({ ...filtros, lote_op: e.target.value })}
             fullWidth

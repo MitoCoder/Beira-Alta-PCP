@@ -1,5 +1,5 @@
 // src/paginas/PaginaEstoque.js
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import LayoutPrincipal from '../componentes/LayoutPrincipal';
 import useProdutos from '../gancho/UseProdutos';
 import TabelaInventarioEdicao from '../componentes/TabelaInventarioEdicao';
@@ -9,25 +9,40 @@ import {
   Stack,
   Button,
   Box,
+  TextField,
 } from '@mui/material';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
 export default function PaginaEstoque() {
   const { produtos, setProdutos } = useProdutos();
-  const areaImpressaoRef = useRef();
+
+  const [filtroCodigo, setFiltroCodigo] = useState('');
+  const [filtroDescricao, setFiltroDescricao] = useState('');
   const [dataHoraSalvamento, setDataHoraSalvamento] = useState(null);
+
+  const areaImpressaoRef = useRef();
+
+  // Filtra localmente sem mexer no useProdutos
+  const produtosFiltrados = useMemo(() => {
+    return produtos.filter((item) => {
+      const codigoMatch = item.codigo.toLowerCase().includes(filtroCodigo.toLowerCase());
+      const descricaoMatch = item.descricao.toLowerCase().includes(filtroDescricao.toLowerCase());
+      return codigoMatch && descricaoMatch;
+    });
+  }, [produtos, filtroCodigo, filtroDescricao]);
 
   const onEditar = (id, campo, valor) => {
     setProdutos((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, [campo]: valor } : item))
+      prev.map((item) =>
+        item.id === id ? { ...item, [campo]: valor } : item
+      )
     );
   };
 
   const onSalvarInventario = () => {
-    console.log('Inventário salvo:', produtos);
     const agora = new Date();
-    const formatado = agora.toLocaleString('pt-BR', {
+    const dataFormatada = agora.toLocaleString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -35,15 +50,34 @@ export default function PaginaEstoque() {
       minute: '2-digit',
       second: '2-digit',
     });
-    setDataHoraSalvamento(formatado);
+
+    // Atualiza produtos com total_inventario e dataInventario
+    setProdutos((prev) =>
+      prev.map((item) => {
+        const und = Number(item.und) || 0;
+        const cx = Number(item.cx) || 0;
+        const plt = Number(item.plt) || 0;
+        const undPorCx = Number(item.unidadePorCaixa) || 0;
+        const cxPorPlt = Number(item.caixasPorPallet) || 0;
+
+        const total = und + cx * undPorCx + plt * cxPorPlt * undPorCx;
+
+        return {
+          ...item,
+          total_inventario: total,
+          dataInventario: dataFormatada,
+        };
+      })
+    );
+
+    setDataHoraSalvamento(dataFormatada);
     alert('Inventário salvo com sucesso!');
   };
 
   const exportarExcel = () => {
-    if (produtos.length === 0) return;
+    if (produtosFiltrados.length === 0) return;
 
-    // Monta os dados somente com os campos desejados e o cálculo do total
-    const dadosParaExcel = produtos.map((item) => {
+    const dadosParaExcel = produtosFiltrados.map((item) => {
       const und = Number(item.und ?? 0);
       const cx = Number(item.cx ?? 0);
       const plt = Number(item.plt ?? 0);
@@ -60,6 +94,7 @@ export default function PaginaEstoque() {
         'UND/CX': undPorCx,
         'CX/PLT': cxPorPlt,
         'TOTAL (UND)': totalUnd,
+        'DATA INVENTÁRIO': item.dataInventario ?? '',
       };
     });
 
@@ -72,28 +107,28 @@ export default function PaginaEstoque() {
   };
 
   const imprimirTabela = () => {
-    if (produtos.length === 0) {
+    if (produtosFiltrados.length === 0) {
       alert('Não há dados para imprimir.');
       return;
     }
 
-    // Monta a tabela HTML apenas com as colunas que você pediu
     const tabelaHtml = `
       <table>
         <thead>
           <tr>
             <th>Código</th>
-            <th>Descrição</th>
+            <th style="width: 40%;">Descrição</th>
             <th>UND</th>
             <th>CX</th>
             <th>PLT</th>
             <th>UND/CX</th>
             <th>CX/PLT</th>
             <th>TOTAL (UND)</th>
+            <th>DATA INVENTÁRIO</th>
           </tr>
         </thead>
         <tbody>
-          ${produtos
+          ${produtosFiltrados
             .map((item) => {
               const und = Number(item.und ?? 0);
               const cx = Number(item.cx ?? 0);
@@ -105,13 +140,14 @@ export default function PaginaEstoque() {
               return `
                 <tr>
                   <td>${item.codigo ?? ''}</td>
-                  <td>${item.descricao ?? ''}</td>
+                  <td style="width: 40%;">${item.descricao ?? ''}</td>
                   <td>${und}</td>
                   <td>${cx}</td>
                   <td>${plt}</td>
                   <td>${undPorCx}</td>
                   <td>${cxPorPlt}</td>
                   <td>${totalUnd}</td>
+                  <td>${item.dataInventario ?? '-'}</td>
                 </tr>
               `;
             })
@@ -154,6 +190,31 @@ export default function PaginaEstoque() {
         Faça o lançamento dos produtos contando por unidade, caixa e pallet.
       </Typography>
 
+      {/* Filtros locais */}
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        spacing={2}
+        alignItems="center"
+        my={2}
+      >
+        <TextField
+          label="Filtrar por Código"
+          variant="outlined"
+          size="small"
+          value={filtroCodigo}
+          onChange={(e) => setFiltroCodigo(e.target.value)}
+          sx={{ width: { xs: '100%', sm: '200px' } }}
+        />
+        <TextField
+          label="Filtrar por Descrição"
+          variant="outlined"
+          size="small"
+          value={filtroDescricao}
+          onChange={(e) => setFiltroDescricao(e.target.value)}
+          sx={{ width: { xs: '100%', sm: '300px' } }}
+        />
+      </Stack>
+
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
         spacing={2}
@@ -168,6 +229,9 @@ export default function PaginaEstoque() {
           <Button variant="contained" color="success" onClick={exportarExcel}>
             📥 Exportar Excel
           </Button>
+          <Button variant="contained" color="primary" onClick={onSalvarInventario}>
+            💾 Salvar Inventário
+          </Button>
         </Stack>
 
         {dataHoraSalvamento && (
@@ -180,9 +244,8 @@ export default function PaginaEstoque() {
       <Paper sx={{ p: 2 }} elevation={2}>
         <div ref={areaImpressaoRef}>
           <TabelaInventarioEdicao
-            inventario={produtos}
+            inventario={produtosFiltrados}
             onEditar={onEditar}
-            onSalvar={onSalvarInventario}
           />
         </div>
       </Paper>

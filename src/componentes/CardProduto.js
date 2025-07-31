@@ -10,7 +10,7 @@ export default function CardProduto({ produto }) {
           {produto.descricao}
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-          <Typography variant="body2">Lote: {produto.lote}</Typography>
+          <Typography variant="body2">Lote: {produto.lote_op}</Typography>
           <Typography variant="body2">Data: {produto.dataProducao || '-'}</Typography>
           <Typography variant="body2">Ordem: {produto.ordem}</Typography>
         </Box>

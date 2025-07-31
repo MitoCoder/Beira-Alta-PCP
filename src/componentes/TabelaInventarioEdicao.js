@@ -2,82 +2,103 @@
 import React from 'react';
 import {
   Table,
-  TableHead,
   TableBody,
-  TableRow,
   TableCell,
+  TableHead,
+  TableRow,
   TextField,
-  Typography,
-  Box,
-  Button,
 } from '@mui/material';
 
-export default function TabelaInventarioEdicao({ inventario, onEditar, onSalvar }) {
-  const calcularTotal = (item) => {
-    const und = Number(item.und) || 0;
-    const cx = Number(item.cx) || 0;
-    const plt = Number(item.plt) || 0;
-    const undPorCx = Number(item.unidadePorCaixa) || 0;
-    const cxPorPlt = Number(item.caixasPorPallet) || 0;
-
-    return und + (cx * undPorCx) + (plt * cxPorPlt * undPorCx);
-  };
-
+export default function TabelaInventarioEdicao({ inventario, onEditar }) {
   return (
-    <Box sx={{ width: '100%', overflowX: 'auto' }}>
-      <Table size="small" sx={{ minWidth: 1000 }}>
-        <TableHead>
-          <TableRow>
-            <TableCell><strong>Código</strong></TableCell>
-            <TableCell><strong>Descrição</strong></TableCell>
-            <TableCell align="center">UND</TableCell>
-            <TableCell align="center">CX</TableCell>
-            <TableCell align="center">PLT</TableCell>
-            <TableCell align="center">UND/CX</TableCell>
-            <TableCell align="center">CX/PLT</TableCell>
-            <TableCell align="center">TOTAL (UND)</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {inventario.map((item) => {
-            const total = calcularTotal(item);
+    <Table size="small" stickyHeader>
+      <TableHead>
+        <TableRow>
+          <TableCell sx={{ width: 100 }}>Código</TableCell>
+          <TableCell sx={{ width: '40%' }}>Descrição</TableCell>
+          <TableCell sx={{ width: 100 }}>UND</TableCell>
+          <TableCell sx={{ width: 100 }}>CX</TableCell>
+          <TableCell sx={{ width: 100 }}>PLT</TableCell>
+          <TableCell sx={{ width: 110 }}>UND/CX</TableCell>
+          <TableCell sx={{ width: 110 }}>CX/PLT</TableCell>
+          <TableCell sx={{ width: 100 }}>TOTAL (UND)</TableCell>
+          <TableCell sx={{ width: 130, textAlign: 'center' }}>
+            DATA INVENTÁRIO
+          </TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {inventario.map((item) => {
+          const und = Number(item.und) || 0;
+          const cx = Number(item.cx) || 0;
+          const plt = Number(item.plt) || 0;
+          const undPorCx = Number(item.unidadePorCaixa) || 0;
+          const cxPorPlt = Number(item.caixasPorPallet) || 0;
 
-            return (
-              <TableRow key={item.id}>
-                <TableCell>{item.codigo}</TableCell>
-                <TableCell>{item.descricao}</TableCell>
+          const totalUnd = und + cx * undPorCx + plt * cxPorPlt * undPorCx;
 
-                {['und', 'cx', 'plt', 'unidadePorCaixa', 'caixasPorPallet'].map((campo) => (
-                  <TableCell key={campo} align="center">
-                    <TextField
-                      size="small"
-                      type="number"
-                      value={item[campo]}
-                      onChange={(e) =>
-                        onEditar(item.id, campo, e.target.value.replace(/\D/g, ''))
-                      }
-                      inputProps={{ style: { fontSize: '0.75rem', textAlign: 'center' } }}
-                      sx={{ width: 80 }}
-                    />
-                  </TableCell>
-                ))}
-
-                <TableCell align="center">
-                  <Typography variant="body2" fontWeight="bold">
-                    {total}
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
-
-      <Box textAlign="right" mt={2}>
-        <Button variant="contained" color="primary" onClick={onSalvar}>
-          Salvar Inventário
-        </Button>
-      </Box>
-    </Box>
+          return (
+            <TableRow key={item.id}>
+              <TableCell>{item.codigo}</TableCell>
+              <TableCell>{item.descricao}</TableCell>
+              <TableCell>
+                <TextField
+                  size="small"
+                  type="number"
+                  value={item.und ?? ''}
+                  onChange={(e) => onEditar(item.id, 'und', e.target.value)}
+                  inputProps={{ min: 0, maxLength: 8 }}
+                  sx={{ minWidth: 100 }}
+                />
+              </TableCell>
+              <TableCell>
+                <TextField
+                  size="small"
+                  type="number"
+                  value={item.cx ?? ''}
+                  onChange={(e) => onEditar(item.id, 'cx', e.target.value)}
+                  inputProps={{ min: 0, maxLength: 8 }}
+                  sx={{ minWidth: 100 }}
+                />
+              </TableCell>
+              <TableCell>
+                <TextField
+                  size="small"
+                  type="number"
+                  value={item.plt ?? ''}
+                  onChange={(e) => onEditar(item.id, 'plt', e.target.value)}
+                  inputProps={{ min: 0, maxLength: 8 }}
+                  sx={{ minWidth: 100 }}
+                />
+              </TableCell>
+              <TableCell>
+                <TextField
+                  size="small"
+                  type="number"
+                  value={item.unidadePorCaixa ?? ''}
+                  onChange={(e) => onEditar(item.id, 'unidadePorCaixa', e.target.value)}
+                  inputProps={{ min: 0, maxLength: 8 }}
+                  sx={{ minWidth: 110 }}
+                />
+              </TableCell>
+              <TableCell>
+                <TextField
+                  size="small"
+                  type="number"
+                  value={item.caixasPorPallet ?? ''}
+                  onChange={(e) => onEditar(item.id, 'caixasPorPallet', e.target.value)}
+                  inputProps={{ min: 0, maxLength: 8 }}
+                  sx={{ minWidth: 110 }}
+                />
+              </TableCell>
+              <TableCell>{totalUnd}</TableCell>
+              <TableCell sx={{ textAlign: 'center' }}>
+                {item.dataInventario ?? '-'}
+              </TableCell>
+            </TableRow>
+          );
+        })}
+      </TableBody>
+    </Table>
   );
 }
