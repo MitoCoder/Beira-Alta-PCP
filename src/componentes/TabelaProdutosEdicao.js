@@ -158,32 +158,26 @@ export default function TabelaProdutosEdicao({ produtos, onEditar }) {
               </TableCell>
 
               <TableCell sx={{ px: 0.5, py: 0.25, textAlign: 'center', minWidth: 30, maxWidth: 40 }}>
-                <TextField
-                  size="small"
-                  type="number"
-                  variant="outlined"
-                  value={produto.ordem}
-                  onChange={(e) =>
-                    onEditar(
-                      produto.id,
-                      'ordem',
-                      e.target.value.replace(/\D/g, '').slice(0, 2)
-                    )
-                  }
-                  inputProps={{
-                    maxLength: 2,
-                    style: {
-                      fontSize: '0.7rem',
-                      padding: '5px 6px',
-                      height: 24,
-                      textAlign: 'center',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    },
-                  }}
-                  sx={{ width: '100%' }}
-                />
+<TextField
+  size="small"
+  type="text"
+  variant="outlined"
+  value={produto.ordem}
+  onChange={(e) => onEditar(produto.id, 'ordem', e.target.value.slice(0, 10))}
+  inputProps={{
+    maxLength: 10,
+    style: {
+      fontSize: '0.7rem',
+      padding: '5px 6px',
+      height: 24,
+      textAlign: 'center',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    },
+  }}
+  sx={{ width: '100%' }}
+/>
               </TableCell>
 
               <TableCell sx={{ px: 0.5, py: 0.25, textAlign: 'center', minWidth: 60, maxWidth: 80 }}>

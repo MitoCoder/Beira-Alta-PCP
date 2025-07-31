@@ -1,5 +1,5 @@
 // src/paginas/PaginaProdutos.js
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -20,9 +20,10 @@ import {
   DialogActions,
 } from '@mui/material';
 import LayoutPrincipal from '../componentes/LayoutPrincipal';
+import useProdutos from '../gancho/UseProdutos';
 
 export default function PaginaProdutos() {
-  const [produtos, setProdutos] = useState([]);
+  const { produtos, setProdutos } = useProdutos();
   const [filtros, setFiltros] = useState({ codigo: '', descricao: '', lote_op: '', data_producao: '' });
   const [drawerAberto, setDrawerAberto] = useState(false);
   const [produtoEdicao, setProdutoEdicao] = useState(null);
@@ -30,45 +31,20 @@ export default function PaginaProdutos() {
   const [idExcluir, setIdExcluir] = useState(null);
 
   const campos = [
-    'id', 'codigo', 'descricao', 'modelo', 'ml', 'tipo', 'media_venda', 'pedido_total',
-    'estoque_atual', 'capacidade_porta_pallet', 'estoque_real', 'nivel', 'duracao_atual',
-    'apos_produzir', 'produzir', 'data_producao', 'ordem', 'linha', 'lote_op', 'status',
-    'falta_para_o_minimo', 'qtd_em_litros', 'und_por_litros', 'saldo_apos_producao',
-    'dias_apos_produzir', 'hold'
+    'id', 'codigo', 'descricao', 'modelo', 'ml', 'tipo', 'mediaVenda', 'pedidoTotal',
+    'estoqueAtual', 'capacidadePortaPallet', 'estoqueReal', 'nivel', 'duracaoAtual',
+    'aposProduzir', 'produzir', 'dataProducao', 'ordem', 'linha', 'lote', 'status',
+    'faltaParaOMinimo', 'qtdEmLitros', 'undPorLitros', 'saldoAposProducao',
+    'diasAposProduzir', 'hold'
   ];
 
-  useEffect(() => {
-    setProdutos([
-      {
-        id: 1,
-        codigo: '1001',
-        descricao: 'Produto A',
-        modelo: 'XPTO',
-        ml: 500,
-        tipo: 'Líquido',
-        media_venda: 10,
-        pedido_total: 20,
-        estoque_atual: 5,
-        capacidade_porta_pallet: 100,
-        estoque_real: 25,
-        nivel: 'Médio',
-        duracao_atual: 3,
-        apos_produzir: 8,
-        produzir: 5,
-        data_producao: '2025-07-01',
-        ordem: 'ORD123',
-        linha: 'Linha 1',
-        lote_op: 'L123',
-        status: 'Ativo',
-        falta_para_o_minimo: 10,
-        qtd_em_litros: 250,
-        und_por_litros: 2,
-        saldo_apos_producao: 30,
-        dias_apos_produzir: 5,
-        hold: false
-      }
-    ]);
-  }, []);
+  const camposNumericos = [
+    'ml', 'mediaVenda', 'pedidoTotal', 'estoqueAtual', 'capacidadePortaPallet',
+    'estoqueReal', 'aposProduzir', 'produzir', 'qtdEmLitros', 'undPorLitros',
+    'saldoAposProducao', 'diasAposProduzir'
+  ];
+
+  const [form, setForm] = useState({});
 
   const abrirDrawer = (produto = null) => {
     setProdutoEdicao(produto);
@@ -82,13 +58,19 @@ export default function PaginaProdutos() {
     setDrawerAberto(true);
   };
 
-  const [form, setForm] = useState({});
-
   const salvarProduto = () => {
+    const produtoSalvo = { ...form };
+    camposNumericos.forEach((campo) => {
+      if (produtoSalvo[campo] !== '') {
+        const num = Number(produtoSalvo[campo]);
+        produtoSalvo[campo] = isNaN(num) ? produtoSalvo[campo] : num;
+      }
+    });
+
     if (produtoEdicao) {
-      setProdutos((prev) => prev.map((p) => (p.id === produtoEdicao.id ? form : p)));
+      setProdutos((prev) => prev.map((p) => (p.id === produtoEdicao.id ? produtoSalvo : p)));
     } else {
-      setProdutos((prev) => [...prev, { ...form, id: Date.now() }]);
+      setProdutos((prev) => [...prev, { ...produtoSalvo, id: Date.now() }]);
     }
     setDrawerAberto(false);
   };
@@ -109,14 +91,12 @@ export default function PaginaProdutos() {
     setConfirmDialogAberto(false);
   };
 
-  const produtosFiltrados = produtos.filter((p) => {
-    return (
-      p.codigo.toLowerCase().includes(filtros.codigo.toLowerCase()) &&
-      p.descricao.toLowerCase().includes(filtros.descricao.toLowerCase()) &&
-      p.lote_op.toLowerCase().includes(filtros.lote_op.toLowerCase()) &&
-      p.data_producao.toLowerCase().includes(filtros.data_producao.toLowerCase())
-    );
-  });
+  const produtosFiltrados = produtos.filter((p) =>
+    p.codigo.toLowerCase().includes(filtros.codigo.toLowerCase()) &&
+    p.descricao.toLowerCase().includes(filtros.descricao.toLowerCase()) &&
+    (p.lote || '').toString().toLowerCase().includes(filtros.lote_op.toLowerCase()) &&
+    (p.dataProducao || '').toLowerCase().includes(filtros.data_producao.toLowerCase())
+  );
 
   const formatarTitulo = (campo) => {
     const mapTitulos = {
@@ -126,25 +106,25 @@ export default function PaginaProdutos() {
       modelo: 'MODELO',
       ml: 'ML',
       tipo: 'TIPO',
-      media_venda: 'MÉDIA VENDA',
-      pedido_total: 'PEDIDO TOTAL',
-      estoque_atual: 'ESTOQUE ATUAL',
-      capacidade_porta_pallet: 'CAPACIDADE PORTA PALLET',
-      estoque_real: 'ESTOQUE REAL',
+      mediaVenda: 'MÉDIA VENDA',
+      pedidoTotal: 'PEDIDO TOTAL',
+      estoqueAtual: 'ESTOQUE ATUAL',
+      capacidadePortaPallet: 'CAPACIDADE PORTA PALLET',
+      estoqueReal: 'ESTOQUE REAL',
       nivel: 'NÍVEL',
-      duracao_atual: 'DURAÇÃO ATUAL',
-      apos_produzir: 'APÓS PRODUZIR',
+      duracaoAtual: 'DURAÇÃO ATUAL',
+      aposProduzir: 'APÓS PRODUZIR',
       produzir: 'PRODUZIR',
-      data_producao: 'DATA PRODUÇÃO',
+      dataProducao: 'DATA PRODUÇÃO',
       ordem: 'OP',
       linha: 'LINHA',
-      lote_op: 'LOTE OP',
+      lote: 'LOTE OP',
       status: 'STATUS',
-      falta_para_o_minimo: 'FALTA PARA MÍNIMO',
-      qtd_em_litros: 'QTD EM LITROS',
-      und_por_litros: 'UND POR LITROS',
-      saldo_apos_producao: 'SALDO APÓS PRODUÇÃO',
-      dias_apos_produzir: 'DIAS APÓS PRODUZIR',
+      faltaParaOMinimo: 'FALTA PARA MÍNIMO',
+      qtdEmLitros: 'QTD EM LITROS',
+      undPorLitros: 'UND POR LITROS',
+      saldoAposProducao: 'SALDO APÓS PRODUÇÃO',
+      diasAposProduzir: 'DIAS APÓS PRODUZIR',
       hold: 'HOLD',
     };
     return mapTitulos[campo] || campo.toUpperCase();
@@ -200,17 +180,12 @@ export default function PaginaProdutos() {
                   <TableCell
                     key={campo}
                     align="center"
-                    sx={{
-                      whiteSpace: 'nowrap',
-                      minWidth: campo === 'data_producao' || campo === 'capacidade_porta_pallet' ? 120 : 80,
-                      fontWeight: 'bold',
-                      fontSize: '0.85rem',
-                    }}
+                    sx={{ whiteSpace: 'nowrap', minWidth: 80, fontWeight: 'bold', fontSize: '0.85rem' }}
                   >
                     {formatarTitulo(campo)}
                   </TableCell>
                 ))}
-                <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+                <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '0.85rem' }}>
                   AÇÕES
                 </TableCell>
               </TableRow>
@@ -219,18 +194,8 @@ export default function PaginaProdutos() {
               {produtosFiltrados.map((p) => (
                 <TableRow key={p.id} hover>
                   {campos.map((campo) => (
-                    <TableCell
-                      key={campo}
-                      align={campo === 'descricao' ? 'left' : 'center'}
-                      sx={{
-                        fontSize: '0.85rem',
-                        whiteSpace: 'normal',
-                        wordBreak: 'break-word',
-                        maxWidth: campo === 'capacidade_porta_pallet' ? 120 : 100,
-                      }}
-                      title={String(p[campo])}
-                    >
-                      {String(p[campo])}
+                    <TableCell key={campo} align={campo === 'descricao' ? 'left' : 'center'}>
+                      {String(p[campo] ?? '')}
                     </TableCell>
                   ))}
                   <TableCell align="center">
@@ -270,9 +235,7 @@ export default function PaginaProdutos() {
                   onChange={(e) => setForm({ ...form, [campo]: e.target.value })}
                   fullWidth
                   size="small"
-                  InputProps={{
-                    readOnly: campo === 'id',
-                  }}
+                  InputProps={{ readOnly: campo === 'id' }}
                 />
               ))}
               <Button variant="contained" color="primary" onClick={salvarProduto}>
@@ -282,7 +245,6 @@ export default function PaginaProdutos() {
           </Box>
         </Drawer>
 
-        {/* Dialog de confirmação */}
         <Dialog open={confirmDialogAberto} onClose={cancelarExcluir}>
           <DialogTitle>Confirmação</DialogTitle>
           <DialogContent>Tem certeza que deseja excluir este produto?</DialogContent>
