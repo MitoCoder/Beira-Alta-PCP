@@ -1,83 +1,59 @@
+// C:\Users\edvam\OneDrive\Área de Trabalho\PCP\controle-pcp\src\gancho\UseProdutos.js
+
 import { useState, useEffect } from 'react';
+import { buscarProdutosDaAPI, atualizarProdutoNaAPI } from '../servicos/api';
 
 export default function useProdutos() {
   const [produtos, setProdutos] = useState([]);
   const [filtro, setFiltro] = useState('');
+  const [carregando, setCarregando] = useState(true); // estado para loading
 
   useEffect(() => {
-    const produtosMock = [
-      {
-        id: 1,
-        codigo: 'A001',
-        descricao: 'Produto A',
-        modelo: 'XPTO',
-        ml: 500,
-        tipo: 'Líquido',
-        mediaVenda: 150,
-        pedidoTotal: 320,
-        estoqueAtual: 100,
-        capacidadePortaPallet: 200,
-        estoqueReal: 100,
-        nivel: 'Alto',
-        duracaoAtual: '2 dias',
-        aposProduzir: 120,
-        produzir: 20,
-        dataProducao: '2025-07-28',
-        ordem: 'ORD-015',
-        linha: 'Linha 1',
-        lote_op: 'L001',
-        status: 'Pendente',
-        faltaParaOMinimo: 50,
-        qtdEmLitros: 250,
-        undPorLitros: 2,
-        saldoAposProducao: 140,
-        diasAposProduzir: 4,
-        hold: 'A',
-        und: 10,
-        cx: 5,
-        plt: 2,
-        unidadePorCaixa: 12,
-        caixasPorPallet: 48,
-        dataInventario: '',
-        total_inventario: 0,
-      },
-      {
-        id: 2,
-        codigo: 'B002',
-        descricao: 'Produto B',
-        modelo: 'ZETA',
-        ml: 1000,
-        tipo: 'Sólido',
-        mediaVenda: 100,
-        pedidoTotal: 210,
-        estoqueAtual: 50,
-        capacidadePortaPallet: 150,
-        estoqueReal: 50,
-        nivel: 'Médio',
-        duracaoAtual: '3 dias',
-        aposProduzir: 80,
-        produzir: 30,
-        dataProducao: '2025-07-30',
-        ordem: 'ORD-002',
-        linha: 'Linha 2',
-        lote_op: 'L002',
-        status: 'Produzindo',
-        faltaParaOMinimo: 25,
-        qtdEmLitros: 400,
-        undPorLitros: 4,
-        saldoAposProducao: 130,
-        diasAposProduzir: 5,
-        hold: 'C',
-        und: 20,
-        cx: 3,
-        plt: 1,
-        unidadePorCaixa: 6,
-        caixasPorPallet: 40,
-        dataInventario: '',
-        total_inventario: 0,
-      },
-    ];
-    setProdutos(produtosMock);
+    async function carregarProdutos() {
+      setCarregando(true); // Inicia carregamento
+      const produtosDaAPI = await buscarProdutosDaAPI();
+
+      const produtosMapeados = produtosDaAPI.map((item) => ({
+        id: item.id,
+        codigo: String(item.codigo),
+        descricao: item.descricao || '',
+        modelo: item.modelo || '',
+        ml: Number(item.ml) || 0,
+        tipo: item.tipo || '',
+        mediaVenda: Number(item.media_venda) || 0,
+        pedidoTotal: Number(item.pedido_total) || 0,
+        estoqueAtual: Number(item.estoque_atual) || 0,
+        capacidadePortaPallet: Number(item.capacidade_porta_pallet) || 0,
+        estoqueReal: Number(item.estoque_real) || 0,
+        nivel: item.nivel || '',
+        duracaoAtual: item.duracao_atual || '',
+        aposProduzir: Number(item.apos_produzir) || 0,
+        produzir: Number(item.produzir) || 0,
+        dataProducao: item.data_producao || '',
+        ordem: item.ordem || '',
+        linha: item.linha || '',
+        lote_op: item.lote_op || '',
+        status: item.status || '',
+        faltaParaOMinimo: Number(item.falta_para_o_minimo) || 0,
+        qtdEmLitros: Number(item.qtd_em_litros) || 0,
+        undPorLitros: Number(item.und_por_litros) || 0,
+        saldoAposProducao: Number(item.saldo_apos_producao) || 0,
+        diasAposProduzir: Number(item.dias_apos_produzir) || 0,
+        hold: item.hold || '',
+        und: Number(item.und) || 0,
+        cx: Number(item.cx) || 0,
+        plt: Number(item.plt) || 0,
+        unidadePorCaixa: Number(item.unidadePorCaixa) || 0,
+        caixasPorPallet: Number(item.caixasPorPallet) || 0,
+        dataInventario: item.dataInventario || '',
+        total_inventario: Number(item.total_Inventario) || 0,
+      }));
+
+      setProdutos(produtosMapeados);
+      setCarregando(false); // Finaliza carregamento
+    }
+
+    carregarProdutos();
   }, []);
 
   const produtosFiltrados = produtos.filter((produto) =>
@@ -89,9 +65,7 @@ export default function useProdutos() {
   const editarCampoInventario = (id, campo, valor) => {
     setProdutos((prev) =>
       prev.map((item) =>
-        item.id === id
-          ? { ...item, [campo]: valor }
-          : item
+        item.id === id ? { ...item, [campo]: valor } : item
       )
     );
   };
@@ -108,7 +82,7 @@ export default function useProdutos() {
         second: '2-digit',
       });
 
-      return prev.map((item) => {
+      const atualizados = prev.map((item) => {
         const und = Number(item.und) || 0;
         const cx = Number(item.cx) || 0;
         const plt = Number(item.plt) || 0;
@@ -117,13 +91,32 @@ export default function useProdutos() {
 
         const total = und + (cx * undPorCx) + (plt * cxPorPlt * undPorCx);
 
-        return {
+        const itemAtualizado = {
           ...item,
           total_inventario: total,
           dataInventario: dataFormatada,
         };
+
+        // Atualiza também na API/planilha
+        atualizarProdutoNaAPI(itemAtualizado);
+
+        return itemAtualizado;
       });
+
+      return atualizados;
     });
+  };
+
+  const atualizarTotaisPedidos = (totaisPorCodigo) => {
+    setProdutos((prevProdutos) =>
+      prevProdutos.map((produto) => {
+        const totalAtualizado = totaisPorCodigo[produto.codigo] ?? produto.pedidoTotal;
+        return {
+          ...produto,
+          pedidoTotal: totalAtualizado,
+        };
+      })
+    );
   };
 
   return {
@@ -133,5 +126,7 @@ export default function useProdutos() {
     setFiltro,
     editarCampoInventario,
     salvarInventario,
+    atualizarTotaisPedidos,
+    carregando,  // <-- exporta carregando para usar no componente
   };
 }

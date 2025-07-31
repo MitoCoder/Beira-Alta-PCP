@@ -19,7 +19,11 @@ import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
+// IMPORTAÇÃO DO HOOK
+import useProdutos from '../gancho/UseProdutos';
+
 export default function PaginaPedidos() {
+  const { atualizarTotaisPedidos } = useProdutos(); // <- Aqui
   const [itens, setItens] = useState([]);
   const [pedidosSeparados, setPedidosSeparados] = useState([]);
   const [resultado, setResultado] = useState(null);
@@ -94,6 +98,25 @@ export default function PaginaPedidos() {
 
     setResultado(agregados);
     setMsgStatus('Processamento concluído!');
+    setBtnColor('success');
+  };
+
+  // ✅ NOVA FUNÇÃO: Enviar totais para o useProdutos
+  const enviarTotaisParaProdutos = () => {
+    if (!resultado) {
+      setMsgStatus('Você precisa processar os arquivos primeiro.');
+      setBtnColor('warning');
+      return;
+    }
+
+    const totaisPorCodigo = Object.entries(resultado).reduce((acc, [chave, quantidade]) => {
+      const [codigo] = chave.split('||');
+      acc[codigo] = Math.round(quantidade);
+      return acc;
+    }, {});
+
+    atualizarTotaisPedidos(totaisPorCodigo);
+    setMsgStatus('Totais enviados ao sistema com sucesso!');
     setBtnColor('success');
   };
 
@@ -189,12 +212,19 @@ export default function PaginaPedidos() {
 
         {resultado && (
           <>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="flex-end" my={2}>
-              <Button variant="contained" color="secondary" onClick={imprimirTabela}>
-                🖨️ Imprimir (A4)
-              </Button>
-              <Button variant="contained" color="success" onClick={exportarExcel}>
-                📥 Exportar Excel
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="space-between" my={2}>
+              <Stack direction="row" spacing={2}>
+                <Button variant="contained" color="secondary" onClick={imprimirTabela}>
+                  🖨️ Imprimir (A4)
+                </Button>
+                <Button variant="contained" color="success" onClick={exportarExcel}>
+                  📥 Exportar Excel
+                </Button>
+              </Stack>
+
+              {/* ✅ BOTÃO NOVO */}
+              <Button variant="contained" color="primary" onClick={enviarTotaisParaProdutos}>
+                🚀 Enviar Totais para Produtos
               </Button>
             </Stack>
 
