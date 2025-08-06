@@ -17,6 +17,9 @@ Este projeto é um sistema web desenvolvido em **React** para atender as rotinas
 ## 🗂️ Estrutura do Projeto
 
 ```
+
+Aplicativo em React JavaScript - Gerenciamento de PCP
+
 src/
 │
 ├── componentes/
