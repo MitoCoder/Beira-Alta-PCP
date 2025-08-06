@@ -20,17 +20,20 @@ Este projeto é um sistema web desenvolvido em **React** para atender as rotinas
 src/
 │
 ├── componentes/
+│   ├── CardProduto.js             # Designer de fundo em formato de card caracteristico do sistema.
 │   ├── LayoutPrincipal.js         # Componente de layout principal (barra superior, container).
+│   ├── TabelaInventarioEdicao.js  # Componente de tabela onde pode editar.
 │   ├── TabelaProdutos.js          # Componente de tabela para exibir produtos.
 │   └── TabelaProdutosEdicao.js    # Componente de tabela onde pode editar.
 │
 ├── gancho/
-│   └── UseProdutos.js             # Hook customizado para gerenciar dados de produtos
+│   └── UseProdutos.js             # Hook customizado para gerenciar dados de produtos de todas as paginas do sistema.
 │
 ├── paginas/
 │   ├── ControleProducao.js        # Página principal para controle da produção
 │   ├── PaginaConfiguracoes.js     # Página para configurações do sistema
 │   ├── PaginaDashboard.js         # Página do dashboard com indicadores
+│   ├── PaginaEstoque.js           # Pagina do estoque.
 │   ├── PaginaPedidos.js           # Página de pedidos com conversão csv - deve enviar os 2 csv pra poder resolver
 │   ├── PaginaProdutos.js          # Página para gerenciamento de produtos
 │   └── PaginasRelatorios.js       # Página para relatórios e análises
@@ -38,7 +41,12 @@ src/
 ├── servicos/
 │   └── api.js                     # Arquivo para futuras integrações com backend (API)
 │
+├── packege.json                
+├── index.js 
+├── index.css
+├── App.css
 └── App.js                         # Arquivo principal que configura as rotas
+
 ```
 
 ---
