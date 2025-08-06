@@ -23,7 +23,7 @@ import { saveAs } from 'file-saver';
 import useProdutos from '../gancho/UseProdutos';
 
 export default function PaginaPedidos() {
-  const { atualizarTotaisPedidos } = useProdutos(); // <- Aqui
+  const { atualizarTotaisPedidos } = useProdutos();
   const [itens, setItens] = useState([]);
   const [pedidosSeparados, setPedidosSeparados] = useState([]);
   const [resultado, setResultado] = useState(null);
@@ -101,7 +101,6 @@ export default function PaginaPedidos() {
     setBtnColor('success');
   };
 
-  // ✅ NOVA FUNÇÃO: Enviar totais para o useProdutos
   const enviarTotaisParaProdutos = () => {
     if (!resultado) {
       setMsgStatus('Você precisa processar os arquivos primeiro.');
@@ -166,18 +165,85 @@ export default function PaginaPedidos() {
       setBtnColor('warning');
       return;
     }
+
     const dadosParaExcel = Object.entries(resultado).map(([chave, quantidade]) => {
       const [codigo, descricao] = chave.split('||');
       return {
-        'Código Produto': codigo,
+        'Código Produto': Number(codigo), // Convertendo para número
         'Descrição': descricao,
-        'Quantidade Total': Math.round(quantidade),
+        'Quantidade Total': Math.round(quantidade), // Já é número
       };
     });
 
     const ws = XLSX.utils.json_to_sheet(dadosParaExcel);
+    
+    // Definindo os tipos de dados para cada coluna
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    
+    // Formatando cabeçalho
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+      const header = XLSX.utils.encode_col(C) + "1";
+      if (!ws[header]) continue;
+      ws[header].s = { // Estilo do cabeçalho
+        font: { bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "4472C4" } }, // Azul escuro
+        border: {
+          top: { style: "thin", color: { rgb: "000000" } },
+          bottom: { style: "thin", color: { rgb: "000000" } },
+          left: { style: "thin", color: { rgb: "000000" } },
+          right: { style: "thin", color: { rgb: "000000" } }
+        }
+      };
+    }
+
+    // Formatando colunas numéricas
+    for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+      // Coluna A (Código Produto)
+      const cellCodigo = XLSX.utils.encode_col(0) + (R + 1);
+      if (ws[cellCodigo]) {
+        ws[cellCodigo].t = 'n'; // Tipo numérico
+        ws[cellCodigo].z = '0'; // Formato sem decimais
+      }
+      
+      // Coluna C (Quantidade Total)
+      const cellQuantidade = XLSX.utils.encode_col(2) + (R + 1);
+      if (ws[cellQuantidade]) {
+        ws[cellQuantidade].t = 'n'; // Tipo numérico
+        ws[cellQuantidade].z = '#,##0'; // Formato com separador de milhares
+      }
+    }
+
+    // Definindo largura das colunas
+    ws['!cols'] = [
+      { wch: 15 }, // Código Produto
+      { wch: 50 }, // Descrição
+      { wch: 20 }  // Quantidade Total
+    ];
+
+    // Adicionando tabela estruturada
+    ws['!autofilter'] = { ref: XLSX.utils.encode_range(range) };
+    
+    // Criando a tabela formal do Excel
+    const table = {
+      name: 'TabelaResumo',
+      displayName: 'ResumoProdutos',
+      ref: XLSX.utils.encode_range(range),
+      headerRowCount: 1,
+      totalsRowCount: 0,
+      columns: [
+        { name: 'Código Produto' },
+        { name: 'Descrição' },
+        { name: 'Quantidade Total' }
+      ]
+    };
+
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Resumo Produtos');
+    
+    // Adicionando a tabela ao workbook
+    if (!wb.Workbook) wb.Workbook = {};
+    if (!wb.Workbook.Tables) wb.Workbook.Tables = [];
+    wb.Workbook.Tables.push(table);
 
     const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
     saveAs(new Blob([wbout], { type: 'application/octet-stream' }), 'resumo_produtos.xlsx');
@@ -222,7 +288,6 @@ export default function PaginaPedidos() {
                 </Button>
               </Stack>
 
-              {/* ✅ BOTÃO NOVO */}
               <Button variant="contained" color="primary" onClick={enviarTotaisParaProdutos}>
                 🚀 Enviar Totais para Produtos
               </Button>
