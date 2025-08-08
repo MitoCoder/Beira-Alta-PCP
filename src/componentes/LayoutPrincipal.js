@@ -22,6 +22,7 @@ import {
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import SearchIcon from '@mui/icons-material/Search';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import { SnackbarProvider, useSnackbar } from 'notistack';
 
 const rotas = [
   { nome: 'Produção', caminho: '/' },
@@ -33,15 +34,14 @@ const rotas = [
   { nome: 'Configurações', caminho: '/configuracoes' },
 ];
 
-export default function LayoutPrincipal({ children }) {
+function LayoutConteudo({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [anchorElUser, setAnchorElUser] = useState(null);
-
   const [busca, setBusca] = useState('');
   const [aberto, setAberto] = useState(false);
-
   const inputRef = useRef(null);
+  const { enqueueSnackbar } = useSnackbar();
 
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
@@ -50,27 +50,24 @@ export default function LayoutPrincipal({ children }) {
     setAnchorElUser(null);
   };
 
-  // Filtra rotas para sugestões baseado na busca
   const rotasFiltradas = busca
     ? rotas.filter((rota) =>
         rota.nome.toLowerCase().includes(busca.toLowerCase())
       )
     : [];
 
-  // Fecha o dropdown ao clicar fora
   const handleClickAway = () => {
     setAberto(false);
   };
 
-  // Navega pra rota clicada e fecha dropdown + limpa busca
   const handleSugestaoClick = (caminho) => {
     navigate(caminho);
     setBusca('');
     setAberto(false);
     inputRef.current.blur();
+    enqueueSnackbar(`Navegando para ${caminho}`, { variant: 'info' });
   };
 
-  // Abre dropdown ao digitar e fecha ao apagar tudo
   useEffect(() => {
     if (busca.trim() !== '') {
       setAberto(true);
@@ -94,13 +91,11 @@ export default function LayoutPrincipal({ children }) {
 
   return (
     <>
-      {/* Barra superior com título, logo, busca, notificações e avatar */}
       <AppBar position="static" color="primary" elevation={1}>
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <Box display="flex" alignItems="center">
-            {/* Logo */}
             <img
-              src="/logo192.png" // Troque pela sua logo
+              src="/logo192.png"
               alt="Logo"
               style={{ width: 40, height: 40, marginRight: 12, borderRadius: 6 }}
             />
@@ -108,7 +103,6 @@ export default function LayoutPrincipal({ children }) {
               Sistema PCP
             </Typography>
 
-            {/* Campo de busca com dropdown */}
             <Box sx={{ ...searchStyles, ml: 3, position: 'relative' }}>
               <SearchIcon sx={{ ml: 1, color: 'inherit' }} />
               <InputBase
@@ -152,7 +146,6 @@ export default function LayoutPrincipal({ children }) {
             </Box>
           </Box>
 
-          {/* Notificações e menu usuário */}
           <Box display="flex" alignItems="center" gap={2}>
             <IconButton size="large" color="inherit" aria-label="notificações">
               <NotificationsIcon />
@@ -180,7 +173,6 @@ export default function LayoutPrincipal({ children }) {
         </Toolbar>
       </AppBar>
 
-      {/* Barra de navegação */}
       <AppBar
         position="static"
         color="default"
@@ -203,10 +195,27 @@ export default function LayoutPrincipal({ children }) {
         </Toolbar>
       </AppBar>
 
-      {/* Conteúdo principal */}
       <Container maxWidth="xl" sx={{ mt: 3, mb: 5 }}>
         {children}
       </Container>
     </>
+  );
+}
+
+export default function LayoutPrincipal({ children }) {
+  return (
+    <SnackbarProvider
+      maxSnack={3}
+      autoHideDuration={3000}
+      anchorOrigin={{
+        vertical: 'bottom',
+        horizontal: 'right',
+      }}
+      style={{
+        zIndex: 9999,
+      }}
+    >
+      <LayoutConteudo>{children}</LayoutConteudo>
+    </SnackbarProvider>
   );
 }

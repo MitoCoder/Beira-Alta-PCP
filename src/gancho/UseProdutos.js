@@ -1,16 +1,15 @@
-// C:\Users\edvam\OneDrive\Área de Trabalho\PCP\controle-pcp\src\gancho\UseProdutos.js
-
 import { useState, useEffect } from 'react';
 import { buscarProdutosDaAPI, atualizarProdutoNaAPI } from '../servicos/api';
 
 export default function useProdutos() {
   const [produtos, setProdutos] = useState([]);
   const [filtro, setFiltro] = useState('');
-  const [carregando, setCarregando] = useState(true); // estado para loading
+  const [carregando, setCarregando] = useState(true);
+  const [alteracoesLocais, setAlteracoesLocais] = useState({});
 
-  useEffect(() => {
-    async function carregarProdutos() {
-      setCarregando(true); // Inicia carregamento
+  async function carregarProdutos() {
+    setCarregando(true);
+    try {
       const produtosDaAPI = await buscarProdutosDaAPI();
 
       const produtosMapeados = produtosDaAPI.map((item) => ({
@@ -46,13 +45,18 @@ export default function useProdutos() {
         unidadePorCaixa: Number(item.unidadePorCaixa) || 0,
         caixasPorPallet: Number(item.caixasPorPallet) || 0,
         dataInventario: item.dataInventario || '',
-        total_inventario: Number(item.total_Inventario) || 0,
+        total_Inventario: Number(item.total_Inventario) || 0,
       }));
 
       setProdutos(produtosMapeados);
-      setCarregando(false); // Finaliza carregamento
+    } catch (error) {
+      console.error("Erro ao buscar produtos:", error);
+    } finally {
+      setCarregando(false);
     }
+  }
 
+  useEffect(() => {
     carregarProdutos();
   }, []);
 
@@ -62,49 +66,84 @@ export default function useProdutos() {
     (produto.lote_op || '').toLowerCase().includes(filtro.toLowerCase())
   );
 
-  const editarCampoInventario = (id, campo, valor) => {
+  const editarCampo = (id, campo, valor) => {
     setProdutos((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, [campo]: valor } : item
       )
     );
+
+    setAlteracoesLocais(prev => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        [campo]: valor,
+        id: id
+      }
+    }));
   };
 
-  const salvarInventario = () => {
-    setProdutos((prev) => {
-      const agora = new Date();
-      const dataFormatada = agora.toLocaleString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-      });
+  const salvarAlteracoes = async () => {
+    if (Object.keys(alteracoesLocais).length === 0) {
+      return { success: false, message: 'Nenhuma alteração para salvar' };
+    }
 
-      const atualizados = prev.map((item) => {
-        const und = Number(item.und) || 0;
-        const cx = Number(item.cx) || 0;
-        const plt = Number(item.plt) || 0;
-        const undPorCx = Number(item.unidadePorCaixa) || 0;
-        const cxPorPlt = Number(item.caixasPorPallet) || 0;
+    try {
+      await Promise.all(
+        Object.values(alteracoesLocais).map(produto =>
+          atualizarProdutoNaAPI(produto)
+        )
+      );
 
-        const total = und + (cx * undPorCx) + (plt * cxPorPlt * undPorCx);
+      setAlteracoesLocais({});
+      await carregarProdutos();
 
-        const itemAtualizado = {
-          ...item,
-          total_inventario: total,
-          dataInventario: dataFormatada,
-        };
+      return { success: true, message: 'Alterações salvas com sucesso!' };
+    } catch (error) {
+      console.error('Erro ao salvar alterações:', error);
+      return { success: false, message: 'Erro ao salvar alterações' };
+    }
+  };
 
-        // Atualiza também na API/planilha
-        atualizarProdutoNaAPI(itemAtualizado);
-
-        return itemAtualizado;
-      });
-
-      return atualizados;
+  const salvarInventario = async () => {
+    const agora = new Date();
+    const dataFormatada = agora.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
     });
+
+    try {
+      const atualizados = await Promise.all(
+        produtos.map(async (item) => {
+          const und = Number(item.und) || 0;
+          const cx = Number(item.cx) || 0;
+          const plt = Number(item.plt) || 0;
+          const undPorCx = Number(item.unidadePorCaixa) || 0;
+          const cxPorPlt = Number(item.caixasPorPallet) || 0;
+
+          const total = und + cx * undPorCx + plt * cxPorPlt * undPorCx;
+
+          const itemAtualizado = {
+            ...item,
+            total_Inventario: total,
+            dataInventario: dataFormatada,
+          };
+
+          await atualizarProdutoNaAPI(itemAtualizado);
+          return itemAtualizado;
+        })
+      );
+
+      setProdutos(atualizados);
+      return { success: true, message: 'Inventário salvo com sucesso!' };
+    } catch (error) {
+      console.error('Erro ao salvar inventário:', error);
+      return { success: false, message: 'Erro ao salvar inventário' };
+    }
   };
 
   const atualizarTotaisPedidos = (totaisPorCodigo) => {
@@ -124,9 +163,11 @@ export default function useProdutos() {
     setProdutos,
     filtro,
     setFiltro,
-    editarCampoInventario,
+    editarCampo,
+    salvarAlteracoes,
     salvarInventario,
     atualizarTotaisPedidos,
-    carregando,  // <-- exporta carregando para usar no componente
+    carregando,
+    alteracoesLocais
   };
 }
